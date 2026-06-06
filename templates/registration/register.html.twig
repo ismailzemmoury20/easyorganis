@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Créer un compte — EasyOrganis</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #06060f;
+            --primary: #7c3aed;
+            --primary-light: #a78bfa;
+            --primary-glow: rgba(124,58,237,0.25);
+            --blue: #3b82f6;
+            --amber: #f59e0b;
+            --amber-glow: rgba(245,158,11,0.2);
+            --border-subtle: rgba(255,255,255,0.08);
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --text-dim: #64748b;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh;
+            background: var(--bg-deep);
+            font-family: 'Inter', system-ui, sans-serif;
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+            display: flex; align-items: center; justify-content: center;
+            overflow-x: hidden; padding: 2rem 1rem;
+        }
+
+        .bg-scene { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+        .bg-grid {
+            position: absolute; inset: 0;
+            background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+        .bg-blob { position: absolute; border-radius: 50%; filter: blur(100px); }
+        .bg-blob-1 { width: 700px; height: 700px; background: var(--primary); top: -300px; left: -300px; opacity: 0.07; }
+        .bg-blob-2 { width: 500px; height: 500px; background: var(--amber); bottom: -200px; right: -200px; opacity: 0.05; }
+
+        .register-wrapper {
+            position: relative; z-index: 1;
+            width: 100%; max-width: 520px;
+        }
+
+        .register-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px; padding: 2.5rem;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05) inset;
+            animation: cardIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(24px) scale(0.98); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .register-logo {
+            display: flex; align-items: center; gap: 0.625rem;
+            margin-bottom: 2rem;
+        }
+        .logo-icon {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--blue));
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px var(--primary-glow);
+        }
+        .logo-name {
+            font-size: 1.25rem; font-weight: 800; letter-spacing: -0.03em;
+            background: linear-gradient(135deg, #fff, var(--primary-light));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+
+        h1 { font-size: 1.6rem; font-weight: 800; letter-spacing: -0.03em; color: var(--text); }
+        .subtitle { font-size: 0.875rem; color: var(--text-muted); margin-top: 0.375rem; }
+
+        .eo-divider { height: 1px; background: var(--border-subtle); margin: 1.75rem 0; }
+
+        /* Role selector */
+        .role-selector { display: grid; grid-template-columns: 1fr 1fr; gap: 0.875rem; margin-bottom: 1.5rem; }
+        .role-option { display: none; }
+        .role-label--selected {
+            border-color: var(--primary) !important;
+            background: rgba(124,58,237,0.08) !important;
+        }
+        .role-label {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 0.625rem; padding: 1.25rem 1rem;
+            background: rgba(255,255,255,0.03);
+            border: 2px solid var(--border-subtle);
+            border-radius: 12px; cursor: pointer;
+            transition: all 0.2s ease; text-align: center;
+            position: relative; overflow: hidden;
+        }
+        .role-label::before {
+            content: ''; position: absolute; inset: 0;
+            opacity: 0; transition: opacity 0.2s;
+        }
+        .role-option:checked + .role-label {
+            border-color: var(--primary);
+            background: rgba(124,58,237,0.08);
+        }
+        .role-option#role-acheteur:checked + .role-label {
+            border-color: var(--amber);
+            background: rgba(245,158,11,0.08);
+        }
+        .role-label:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); }
+        .role-icon {
+            width: 44px; height: 44px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
+        }
+        .role-icon.org  { background: rgba(124,58,237,0.15); }
+        .role-icon.buy  { background: rgba(245,158,11,0.15); }
+        .role-title { font-size: 0.9rem; font-weight: 700; color: var(--text); }
+        .role-desc  { font-size: 0.75rem; color: var(--text-muted); }
+        .role-check {
+            position: absolute; top: 0.625rem; right: 0.625rem;
+            width: 18px; height: 18px; border-radius: 50%;
+            background: var(--primary); color: #fff;
+            font-size: 0.6rem; display: none;
+            align-items: center; justify-content: center;
+        }
+        .role-option:checked + .role-label .role-check { display: flex; }
+
+        /* Form inputs */
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.875rem; }
+        .form-group { margin-bottom: 1rem; }
+        .form-label { font-size: 0.82rem; font-weight: 500; color: var(--text-muted); margin-bottom: 0.4rem; display: block; }
+        .input-wrap { position: relative; }
+        .input-icon {
+            position: absolute; left: 0.875rem; top: 50%;
+            transform: translateY(-50%); color: var(--text-dim); font-size: 0.9rem; pointer-events: none;
+        }
+        .form-input {
+            width: 100%; background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border-subtle); color: var(--text);
+            border-radius: 10px; padding: 0.7rem 1rem 0.7rem 2.5rem;
+            font-size: 0.9rem; font-family: inherit;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease; outline: none;
+        }
+        .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+            background: rgba(255,255,255,0.06);
+        }
+        .form-input::placeholder { color: var(--text-dim); }
+
+        .section-title {
+            font-size: 0.75rem; font-weight: 600;
+            color: var(--text-dim); text-transform: uppercase;
+            letter-spacing: 0.08em; margin: 1.5rem 0 1rem;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border-subtle); }
+
+        .terms-row {
+            display: flex; align-items: flex-start; gap: 0.625rem;
+            margin: 1.25rem 0;
+        }
+        .terms-row input[type="checkbox"] {
+            width: 16px; height: 16px; margin-top: 2px;
+            accent-color: var(--primary); cursor: pointer; flex-shrink: 0;
+        }
+        .terms-row label { font-size: 0.82rem; color: var(--text-muted); }
+        .terms-row a { color: var(--primary-light); text-decoration: none; }
+        .terms-row a:hover { text-decoration: underline; }
+
+        .btn-submit {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary), #5b21b6);
+            color: #fff; border: none; border-radius: 10px;
+            padding: 0.8rem; font-weight: 600; font-size: 0.95rem;
+            font-family: inherit; cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 20px var(--primary-glow);
+            display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+        }
+        .btn-submit:hover { transform: translateY(-1px); box-shadow: 0 8px 30px var(--primary-glow); }
+        .btn-submit:active { transform: translateY(0); }
+
+        .eo-alert {
+            background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2);
+            color: #f87171; border-radius: 10px;
+            padding: 0.75rem 1rem; font-size: 0.85rem;
+            display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1.25rem;
+        }
+
+        .login-link {
+            text-align: center; margin-top: 1.5rem;
+            font-size: 0.85rem; color: var(--text-muted);
+        }
+        .login-link a { color: var(--primary-light); text-decoration: none; font-weight: 500; }
+        .login-link a:hover { text-decoration: underline; }
+
+        @media (max-width: 480px) {
+            .form-row { grid-template-columns: 1fr; }
+            .register-card { padding: 1.75rem 1.25rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="bg-scene">
+    <div class="bg-grid"></div>
+    <div class="bg-blob bg-blob-1"></div>
+    <div class="bg-blob bg-blob-2"></div>
+</div>
+
+<div class="register-wrapper">
+    <div class="register-card">
+        <div class="register-logo">
+            <div class="logo-icon">🎟</div>
+            <span class="logo-name">EasyOrganis</span>
+        </div>
+
+        <h1>Créer un compte</h1>
+        <p class="subtitle">Rejoignez des milliers d'organisateurs et d'acheteurs</p>
+
+        <div class="eo-divider"></div>
+
+        {% for flash_error in app.flashes('verify_email_error') %}
+        <div class="eo-alert">
+            <i class="bi bi-exclamation-circle"></i>
+            {{ flash_error }}
+        </div>
+        {% endfor %}
+
+        {% for msg in app.flashes('error') %}
+        <div class="eo-alert" style="background:rgba(239,68,68,0.12);border-color:rgba(239,68,68,0.3);color:#f87171;">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            {{ msg }}
+        </div>
+        {% endfor %}
+
+        {% for msg in app.flashes('success') %}
+        <div class="eo-alert" style="background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.25);color:#34d399;">
+            <i class="bi bi-check-circle-fill"></i>
+            {{ msg }}
+        </div>
+        {% endfor %}
+
+        {# Variables Twig attendues : registrationForm #}
+        {{ form_start(registrationForm, {'attr': {'novalidate': 'novalidate'}}) }}
+
+            {# ── Choix du rôle ── #}
+            {# Hidden input — valeur mise à jour par JS au clic sur une carte #}
+            <input type="hidden" name="registration_form[typeCompte]" id="typeCompteInput" value="acheteur">
+
+            <div class="section-title">Je suis…</div>
+            <div class="role-selector">
+                <div class="role-label" id="card-organisateur" onclick="selectRole('organisateur')">
+                    <div class="role-check" id="check-organisateur"><i class="bi bi-check"></i></div>
+                    <div class="role-icon org">🎪</div>
+                    <div class="role-title">Organisateur</div>
+                    <div class="role-desc">Créez & gérez vos événements</div>
+                </div>
+
+                <div class="role-label role-label--selected" id="card-acheteur" onclick="selectRole('acheteur')">
+                    <div class="role-check" id="check-acheteur" style="display:flex;background:var(--amber);"><i class="bi bi-check"></i></div>
+                    <div class="role-icon buy">🎫</div>
+                    <div class="role-title">Acheteur</div>
+                    <div class="role-desc">Découvrez & achetez des billets</div>
+                </div>
+            </div>
+
+            {# ── Identité ── #}
+            <div class="section-title">Identité</div>
+            <div class="form-row">
+                <div class="form-group">
+                    {{ form_label(registrationForm.nom, 'Nom', {'label_attr': {'class': 'form-label'}}) }}
+                    <div class="input-wrap">
+                        <i class="bi bi-person input-icon"></i>
+                        {{ form_widget(registrationForm.nom, {'attr': {'class': 'form-input', 'placeholder': 'Dupont'}}) }}
+                    </div>
+                    {{ form_errors(registrationForm.nom) }}
+                </div>
+                <div class="form-group">
+                    {{ form_label(registrationForm.prenom, 'Prénom', {'label_attr': {'class': 'form-label'}}) }}
+                    <div class="input-wrap">
+                        <i class="bi bi-person input-icon"></i>
+                        {{ form_widget(registrationForm.prenom, {'attr': {'class': 'form-input', 'placeholder': 'Jean'}}) }}
+                    </div>
+                    {{ form_errors(registrationForm.prenom) }}
+                </div>
+            </div>
+
+            {# ── Connexion ── #}
+            <div class="section-title">Connexion</div>
+            <div class="form-group">
+                {{ form_label(registrationForm.email, 'Adresse email', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="input-wrap">
+                    <i class="bi bi-envelope input-icon"></i>
+                    {{ form_widget(registrationForm.email, {'attr': {'class': 'form-input', 'placeholder': 'vous@exemple.com'}}) }}
+                </div>
+                {{ form_errors(registrationForm.email) }}
+            </div>
+
+            <div class="form-group">
+                {{ form_label(registrationForm.plainPassword, 'Mot de passe', {'label_attr': {'class': 'form-label'}}) }}
+                <div class="input-wrap">
+                    <i class="bi bi-lock input-icon"></i>
+                    {{ form_widget(registrationForm.plainPassword, {'attr': {'class': 'form-input', 'placeholder': '••••••••'}}) }}
+                </div>
+                {{ form_errors(registrationForm.plainPassword) }}
+            </div>
+
+            <div class="terms-row">
+                {{ form_widget(registrationForm.agreeTerms) }}
+                <label for="{{ registrationForm.agreeTerms.vars.id }}">
+                    J'accepte les <a href="#">conditions d'utilisation</a> et la <a href="#">politique de confidentialité</a>
+                </label>
+            </div>
+            {{ form_errors(registrationForm.agreeTerms) }}
+
+            <button type="submit" class="btn-submit">
+                <i class="bi bi-rocket-takeoff"></i>
+                Créer mon compte
+            </button>
+
+        {{ form_end(registrationForm, {'render_rest': false}) }}
+    </div>
+
+    <div class="login-link">
+        Déjà un compte ?
+        <a href="{{ path('app_login') }}">Se connecter</a>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+function selectRole(role) {
+    // Met à jour le hidden input
+    document.getElementById('typeCompteInput').value = role;
+
+    // Reset les deux cartes
+    var cards = ['organisateur', 'acheteur'];
+    cards.forEach(function(r) {
+        var card  = document.getElementById('card-' + r);
+        var check = document.getElementById('check-' + r);
+        card.classList.remove('role-label--selected');
+        check.style.display = 'none';
+    });
+
+    // Active la carte sélectionnée
+    var selectedCard  = document.getElementById('card-' + role);
+    var selectedCheck = document.getElementById('check-' + role);
+    selectedCard.classList.add('role-label--selected');
+    selectedCheck.style.display = 'flex';
+}
+</script>
+</body>
+</html>

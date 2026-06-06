@@ -1,0 +1,369 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Créer un événement{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .create-layout {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+    }
+
+    .section-block {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 1.25rem;
+        transition: border-color 0.2s ease;
+    }
+    .section-block:hover { border-color: rgba(139,92,246,0.2); }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+    .section-num {
+        width: 28px; height: 28px;
+        background: linear-gradient(135deg, var(--primary), var(--blue));
+        border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.75rem; font-weight: 700; color: #fff;
+        flex-shrink: 0;
+    }
+    .section-header h2 {
+        font-size: 1rem; font-weight: 700;
+        color: var(--text); margin: 0;
+        letter-spacing: -0.02em;
+    }
+    .section-header p {
+        font-size: 0.8rem; color: var(--text-muted); margin: 0;
+    }
+
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    .form-group-eo { margin-bottom: 1.125rem; }
+
+    .image-drop {
+        border: 2px dashed rgba(255,255,255,0.1);
+        border-radius: 12px;
+        padding: 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: rgba(255,255,255,0.02);
+    }
+    .image-drop:hover {
+        border-color: var(--primary);
+        background: rgba(124,58,237,0.05);
+    }
+    .image-drop i { font-size: 2rem; color: var(--text-dim); margin-bottom: 0.5rem; display: block; }
+    .image-drop p { font-size: 0.85rem; color: var(--text-muted); margin: 0; }
+    .image-drop small { font-size: 0.75rem; color: var(--text-dim); }
+
+    .price-input-wrap { position: relative; }
+    .price-suffix {
+        position: absolute; right: 1rem; top: 50%;
+        transform: translateY(-50%);
+        font-size: 0.85rem; font-weight: 600;
+        color: var(--amber);
+    }
+
+    .form-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    /* Override Bootstrap form styling */
+    .form-group-eo .form-control,
+    .form-group-eo .form-select,
+    .form-group-eo textarea.form-control {
+        background: rgba(255,255,255,0.04) !important;
+        border: 1px solid rgba(255,255,255,0.08) !important;
+        color: var(--text) !important;
+        border-radius: 10px !important;
+        font-size: 0.9rem !important;
+    }
+    .form-group-eo .form-control:focus,
+    .form-group-eo .form-select:focus,
+    .form-group-eo textarea.form-control:focus {
+        border-color: var(--primary) !important;
+        box-shadow: 0 0 0 3px var(--primary-glow) !important;
+    }
+    textarea.form-control { min-height: 120px; resize: vertical; }
+    select.form-select option { background: #1a1a2e; color: var(--text); }
+
+    @media (max-width: 600px) {
+        .field-row { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+{# Variables Twig attendues : form (EvenementType) #}
+<div class="create-layout animate-fade-up">
+
+    {# Page header #}
+    <div class="page-header" style="padding-top:0.5rem;">
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;">
+            <div style="width:36px;height:36px;background:linear-gradient(135deg,var(--primary),var(--blue));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;">🎪</div>
+            <h1 style="margin:0;">Créer un événement</h1>
+        </div>
+        <p>Remplissez les informations pour publier votre événement</p>
+    </div>
+
+    {{ form_start(form, {'attr': {'enctype': 'multipart/form-data', 'novalidate': 'novalidate'}}) }}
+
+        {# ── Section 1 : Informations générales ── #}
+        <div class="section-block animate-fade-up delay-1">
+            <div class="section-header">
+                <div class="section-num">1</div>
+                <div>
+                    <h2>Informations générales</h2>
+                    <p>Nom, catégorie et description de l'événement</p>
+                </div>
+            </div>
+
+            <div class="form-group-eo">
+                {{ form_label(form.nom, 'Nom de l\'événement', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.nom, {'attr': {'class': 'form-control', 'placeholder': 'Ex : Festival d\'été 2025'}}) }}
+                {{ form_errors(form.nom) }}
+            </div>
+
+            <div class="form-group-eo">
+                {{ form_label(form.categorie, 'Catégorie', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.categorie, {'attr': {'class': 'form-select'}}) }}
+                {{ form_errors(form.categorie) }}
+            </div>
+
+            <div class="form-group-eo">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.4rem;flex-wrap:wrap;gap:0.5rem;">
+                    {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label', 'style': 'margin:0;'}}) }}
+                    <button type="button" id="btn-generate-ai" onclick="genererDescriptionIA()"
+                        style="display:inline-flex;align-items:center;gap:0.4rem;font-size:0.78rem;font-weight:700;
+                               padding:0.3rem 0.875rem;border-radius:8px;cursor:pointer;border:1px solid rgba(99,102,241,0.35);
+                               background:rgba(99,102,241,0.1);color:#818cf8;transition:all 0.15s;">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2L9.19 8.63L2 9.24L7 13.97L5.82 21L12 17.27L18.18 21L17 13.97L22 9.24L14.81 8.63L12 2Z"/>
+                        </svg>
+                        <span id="btn-generate-text">Générer avec l'IA</span>
+                    </button>
+                </div>
+
+                {{ form_widget(form.description, {'attr': {'class': 'form-control', 'id': 'description-textarea', 'placeholder': 'Décrivez votre événement en détail… ou générez avec l\'IA ✨', 'rows': '5'}}) }}
+                {{ form_errors(form.description) }}
+
+                {# Preview IA — caché par défaut #}
+                <div id="ai-preview" style="display:none;margin-top:0.875rem;
+                     background:rgba(99,102,241,0.07);border:1px solid rgba(99,102,241,0.25);
+                     border-radius:12px;overflow:hidden;">
+                    <div style="display:flex;align-items:center;gap:0.5rem;padding:0.75rem 1rem;
+                                border-bottom:1px solid rgba(99,102,241,0.15);background:rgba(99,102,241,0.08);">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="#818cf8">
+                            <path d="M12 2L9.19 8.63L2 9.24L7 13.97L5.82 21L12 17.27L18.18 21L17 13.97L22 9.24L14.81 8.63L12 2Z"/>
+                        </svg>
+                        <span style="font-size:0.78rem;font-weight:700;color:#818cf8;">Suggestion générée par l'IA</span>
+                        <span style="margin-left:auto;font-size:0.72rem;color:#6366f1;opacity:0.7;">Vérifiez avant de valider</span>
+                    </div>
+                    <div style="padding:1rem;">
+                        <p id="ai-preview-text" style="font-size:0.875rem;color:#c7d2fe;line-height:1.7;margin:0 0 1rem;"></p>
+                        <div style="display:flex;gap:0.625rem;flex-wrap:wrap;">
+                            <button type="button" onclick="validerDescription()"
+                                style="display:inline-flex;align-items:center;gap:0.4rem;font-size:0.8rem;font-weight:700;
+                                       padding:0.45rem 1rem;border-radius:8px;cursor:pointer;
+                                       background:rgba(99,102,241,0.2);color:#818cf8;
+                                       border:1px solid rgba(99,102,241,0.35);transition:all 0.15s;">
+                                <i class="bi bi-check-lg"></i> Utiliser cette description
+                            </button>
+                            <button type="button" onclick="genererDescriptionIA()"
+                                style="display:inline-flex;align-items:center;gap:0.4rem;font-size:0.8rem;font-weight:600;
+                                       padding:0.45rem 1rem;border-radius:8px;cursor:pointer;
+                                       background:rgba(255,255,255,0.04);color:#9896b8;
+                                       border:1px solid rgba(255,255,255,0.08);transition:all 0.15s;">
+                                <i class="bi bi-arrow-clockwise"></i> Regénérer
+                            </button>
+                            <button type="button" onclick="fermerPreview()"
+                                style="display:inline-flex;align-items:center;gap:0.4rem;font-size:0.8rem;font-weight:600;
+                                       padding:0.45rem 1rem;border-radius:8px;cursor:pointer;
+                                       background:transparent;color:#5c5a7a;
+                                       border:1px solid rgba(255,255,255,0.06);transition:all 0.15s;">
+                                <i class="bi bi-x"></i> Ignorer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ai-badge" style="display:flex;align-items:center;gap:6px;margin-top:8px;color:#6366f1;font-size:0.8rem;opacity:0.8;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 2L9.19 8.63L2 9.24L7 13.97L5.82 21L12 17.27L18.18 21L17 13.97L22 9.24L14.81 8.63L12 2Z"/>
+                    </svg>
+                    <span>Description générée automatiquement par IA — à relire avant publication</span>
+                </div>
+            </div>
+        </div>
+
+        {# ── Section 2 : Date & Lieu ── #}
+        <div class="section-block animate-fade-up delay-2">
+            <div class="section-header">
+                <div class="section-num">2</div>
+                <div>
+                    <h2>Date & Lieu</h2>
+                    <p>Quand et où se déroule l'événement</p>
+                </div>
+            </div>
+
+            <div class="field-row">
+                <div class="form-group-eo">
+                    {{ form_label(form.date, 'Date de l\'événement', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.date, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.date) }}
+                </div>
+                <div class="form-group-eo">
+                    {{ form_label(form.lieu, 'Lieu', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.lieu, {'attr': {'class': 'form-control', 'placeholder': 'Ex : Palais des Sports, Paris'}}) }}
+                    {{ form_errors(form.lieu) }}
+                </div>
+            </div>
+        </div>
+
+        {# ── Section 3 : Billetterie ── #}
+        <div class="section-block animate-fade-up delay-3">
+            <div class="section-header">
+                <div class="section-num">3</div>
+                <div>
+                    <h2>Billetterie</h2>
+                    <p>Prix et nombre de places disponibles</p>
+                </div>
+            </div>
+
+            <div class="field-row">
+                <div class="form-group-eo">
+                    {{ form_label(form.nombres_places, 'Nombre de places', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.nombres_places, {'attr': {'class': 'form-control', 'placeholder': '500', 'min': '1'}}) }}
+                    {{ form_errors(form.nombres_places) }}
+                </div>
+                <div class="form-group-eo">
+                    {{ form_label(form.prix_ticket, 'Prix du ticket (€)', {'label_attr': {'class': 'form-label'}}) }}
+                    <div class="price-input-wrap">
+                        {{ form_widget(form.prix_ticket, {'attr': {'class': 'form-control', 'placeholder': '25.00', 'step': '0.01', 'min': '0'}}) }}
+                        <span class="price-suffix">€</span>
+                    </div>
+                    {{ form_errors(form.prix_ticket) }}
+                </div>
+            </div>
+        </div>
+
+        {# ── Section 4 : Image ── #}
+        <div class="section-block animate-fade-up delay-4">
+            <div class="section-header">
+                <div class="section-num">4</div>
+                <div>
+                    <h2>Visuel de l'événement</h2>
+                    <p>Image de couverture (JPG, PNG — max 5 Mo)</p>
+                </div>
+            </div>
+
+            <div class="form-group-eo">
+                {{ form_widget(form.image, {'attr': {'class': 'form-control', 'accept': 'image/*'}}) }}
+                {{ form_errors(form.image) }}
+            </div>
+        </div>
+
+        {# ── Actions ── #}
+        <div class="form-actions">
+            <a href="{{ path('app_organisateur_evenements') }}" class="btn-secondary-eo">
+                <i class="bi bi-arrow-left"></i> Annuler
+            </a>
+            <button type="submit" class="btn-primary-eo">
+                <i class="bi bi-rocket-takeoff"></i>
+                Publier l'événement
+            </button>
+        </div>
+
+    {{ form_end(form) }}
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+const GENERATE_URL = "{{ path('app_generer_description') }}";
+
+function getFormValues() {
+    const nom         = document.querySelector('[name$="[nom]"]')?.value ?? '';
+    const lieu        = document.querySelector('[name$="[lieu]"]')?.value ?? '';
+    const date        = document.querySelector('[name$="[date]"]')?.value ?? '';
+    const catSelect   = document.querySelector('[name$="[categorie]"]');
+    const categorie   = catSelect?.options[catSelect.selectedIndex]?.text ?? '';
+    const description = (document.querySelector('[name$="[description]"]')
+                      || document.getElementById('description-textarea'))?.value ?? '';
+    return { nom, lieu, date, categorie, description };
+}
+
+async function genererDescriptionIA() {
+    const { nom, lieu, date, categorie, description } = getFormValues();
+
+    if (!nom.trim()) {
+        alert('Remplissez au moins le nom de l\'événement avant de générer.');
+        return;
+    }
+
+    // État chargement
+    const btn  = document.getElementById('btn-generate-ai');
+    const text = document.getElementById('btn-generate-text');
+    btn.disabled = true;
+    text.textContent = 'Génération…';
+
+    try {
+        const response = await fetch(GENERATE_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ nom, lieu, date, categorie, description })
+        });
+
+        if (!response.ok) throw new Error('Erreur serveur');
+
+        const data = await response.json();
+        const description = data.description ?? '';
+
+        // Affiche le preview
+        document.getElementById('ai-preview-text').textContent = description;
+        document.getElementById('ai-preview').style.display = 'block';
+        document.getElementById('ai-preview').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    } catch (e) {
+        alert('Erreur lors de la génération. Réessayez.');
+    } finally {
+        btn.disabled = false;
+        text.textContent = 'Générer avec l\'IA';
+    }
+}
+
+function validerDescription() {
+    const texte = document.getElementById('ai-preview-text').textContent;
+    const ta = document.querySelector('[name$="[description]"]')
+            || document.getElementById('description-textarea');
+    if (ta) {
+        ta.value = texte;
+        ta.style.borderColor = 'rgba(99,102,241,0.5)';
+        ta.style.boxShadow   = '0 0 0 3px rgba(99,102,241,0.15)';
+        setTimeout(() => {
+            ta.style.borderColor = '';
+            ta.style.boxShadow   = '';
+        }, 1500);
+    }
+    document.getElementById('ai-preview').style.display = 'none';
+}
+
+function fermerPreview() {
+    document.getElementById('ai-preview').style.display = 'none';
+}
+</script>
+{% endblock %}
+

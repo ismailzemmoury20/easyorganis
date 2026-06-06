@@ -1,0 +1,149 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Paiement — EasyOrganis{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .checkout-layout {
+        max-width: 560px;
+        margin: 0 auto;
+        padding: 3rem 1.5rem;
+    }
+
+    .checkout-card {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 1.25rem;
+    }
+
+    .checkout-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        display: flex; align-items: center; gap: 0.875rem;
+    }
+    .checkout-header-icon {
+        width: 44px; height: 44px; border-radius: 12px;
+        background: linear-gradient(135deg, var(--primary), var(--blue));
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.2rem; flex-shrink: 0;
+    }
+    .checkout-header h2 {
+        font-size: 1rem; font-weight: 700; color: var(--text); margin: 0;
+    }
+    .checkout-header p {
+        font-size: 0.8rem; color: var(--text-muted); margin: 0;
+    }
+
+    .checkout-body { padding: 1.5rem; }
+
+    .checkout-row {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 0.625rem 0;
+        border-bottom: 1px solid rgba(255,255,255,0.04);
+        font-size: 0.875rem;
+    }
+    .checkout-row:last-child { border-bottom: none; }
+    .checkout-row-label { color: var(--text-muted); }
+    .checkout-row-value { color: var(--text); font-weight: 600; }
+    .checkout-row-total .checkout-row-label { font-weight: 700; color: var(--text); font-size: 1rem; }
+    .checkout-row-total .checkout-row-value { font-size: 1.3rem; font-weight: 800; color: var(--amber); }
+
+    .stripe-badge {
+        display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+        padding: 0.875rem;
+        background: rgba(255,255,255,0.02);
+        border-top: 1px solid rgba(255,255,255,0.06);
+        font-size: 0.78rem; color: var(--text-dim);
+    }
+    .stripe-badge i { color: #635bff; }
+
+    .btn-checkout {
+        width: 100%;
+        padding: 1rem;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #635bff, #7c3aed);
+        color: #fff;
+        font-size: 1rem; font-weight: 700;
+        border: none; cursor: pointer;
+        display: flex; align-items: center; justify-content: center; gap: 0.625rem;
+        text-decoration: none;
+        transition: opacity 0.15s, transform 0.15s;
+        box-shadow: 0 8px 24px rgba(99,91,255,0.3);
+        margin-bottom: 0.875rem;
+    }
+    .btn-checkout:hover { opacity: 0.88; transform: translateY(-1px); color: #fff; }
+
+    .security-note {
+        display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+        font-size: 0.78rem; color: var(--text-dim); margin-bottom: 1.5rem;
+    }
+    .security-note i { color: #34d399; }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="checkout-layout animate-fade-up">
+
+    <div class="page-header" style="padding-top:0.5rem;margin-bottom:2rem;">
+        <h1>Finaliser l'achat</h1>
+        <p>Vérifiez les détails avant de procéder au paiement sécurisé</p>
+    </div>
+
+    {# Récapitulatif commande #}
+    <div class="checkout-card animate-fade-up delay-1">
+        <div class="checkout-header">
+            <div class="checkout-header-icon">🎟</div>
+            <div>
+                <h2>Récapitulatif</h2>
+                <p>Détails de votre commande</p>
+            </div>
+        </div>
+        <div class="checkout-body">
+            <div class="checkout-row">
+                <span class="checkout-row-label">Événement</span>
+                <span class="checkout-row-value">{{ evenement.nom ?? '—' }}</span>
+            </div>
+            <div class="checkout-row">
+                <span class="checkout-row-label">Date</span>
+                <span class="checkout-row-value">{{ evenement.date is defined ? evenement.date|date('d M Y') : '—' }}</span>
+            </div>
+            <div class="checkout-row">
+                <span class="checkout-row-label">Lieu</span>
+                <span class="checkout-row-value">{{ evenement.lieu ?? '—' }}</span>
+            </div>
+            <div class="checkout-row">
+                <span class="checkout-row-label">Quantité</span>
+                <span class="checkout-row-value">1 billet</span>
+            </div>
+            <div class="checkout-row checkout-row-total" style="padding-top:1rem;margin-top:0.5rem;border-top:1px solid rgba(255,255,255,0.08);border-bottom:none;">
+                <span class="checkout-row-label">Total</span>
+                <span class="checkout-row-value">{{ evenement.prixTicket is defined ? evenement.prixTicket|number_format(2, '.', ' ') ~ ' €' : '—' }}</span>
+            </div>
+        </div>
+        <div class="stripe-badge">
+            <i class="bi bi-shield-lock-fill"></i>
+            Paiement sécurisé par Stripe
+        </div>
+    </div>
+
+    {# Bouton paiement #}
+    <div class="animate-fade-up delay-2">
+        <div class="security-note">
+            <i class="bi bi-lock-fill"></i>
+            Vos données bancaires sont chiffrées et sécurisées
+        </div>
+
+        <a href="{{ path('app_create_checkout', {id: evenement.id}) }}" class="btn-checkout">
+            <i class="bi bi-credit-card-fill"></i>
+            Payer {{ evenement.prixTicket is defined ? evenement.prixTicket|number_format(2, '.', ' ') ~ ' €' : '' }} avec Stripe
+        </a>
+
+        <a href="{{ path('app_acheteur') }}" class="btn-secondary-eo" style="width:100%;text-align:center;justify-content:center;">
+            <i class="bi bi-arrow-left"></i> Annuler et revenir
+        </a>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,329 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ evenement.nom }}{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .event-detail-layout { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
+
+    /* Two-column layout */
+    .event-detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 1.5rem;
+        align-items: start;
+    }
+
+    /* Main column */
+    .event-cover-full {
+        border-radius: 20px; overflow: hidden;
+        height: 380px;
+        background: linear-gradient(135deg, rgba(124,58,237,0.3), rgba(59,130,246,0.3));
+        position: relative; margin-bottom: 1.5rem;
+    }
+    .event-cover-full img {
+        width: 100%; height: 100%; object-fit: cover;
+    }
+    .event-cover-full-placeholder {
+        width: 100%; height: 100%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 6rem;
+    }
+    .event-cover-overlay-full {
+        position: absolute; inset: 0;
+        background: linear-gradient(to bottom, transparent 50%, rgba(6,6,15,0.7));
+    }
+
+    .main-content-block {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 16px; padding: 2rem;
+        margin-bottom: 1.25rem;
+    }
+
+    .event-title-main {
+        font-size: 2rem; font-weight: 800;
+        letter-spacing: -0.04em; color: var(--text);
+        line-height: 1.2; margin-bottom: 1rem;
+    }
+
+    .organizer-row {
+        display: flex; align-items: center; gap: 0.75rem;
+        padding: 0.875rem;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 10px; margin-bottom: 1.5rem;
+    }
+    .organizer-avatar {
+        width: 38px; height: 38px; border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), var(--blue));
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.85rem; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+    .organizer-info span { font-size: 0.72rem; color: var(--text-dim); display: block; }
+    .organizer-info strong { font-size: 0.9rem; color: var(--text); font-weight: 600; }
+
+    .event-tags { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .event-tag {
+        font-size: 0.75rem; font-weight: 500;
+        padding: 0.25rem 0.75rem; border-radius: 999px;
+        background: rgba(124,58,237,0.1);
+        border: 1px solid rgba(124,58,237,0.2);
+        color: var(--primary-light);
+    }
+
+    .event-description {
+        font-size: 0.925rem; color: var(--text-muted);
+        line-height: 1.8; white-space: pre-line;
+    }
+
+    .info-grid {
+        display: grid; grid-template-columns: 1fr 1fr; gap: 0.875rem;
+    }
+    .info-item {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 10px; padding: 1rem;
+    }
+    .info-item-label {
+        font-size: 0.72rem; font-weight: 600;
+        text-transform: uppercase; letter-spacing: 0.06em;
+        color: var(--text-dim); margin-bottom: 0.375rem;
+    }
+    .info-item-value {
+        font-size: 0.9rem; font-weight: 600; color: var(--text);
+        display: flex; align-items: center; gap: 0.5rem;
+    }
+    .info-item-value i { color: var(--primary-light); }
+
+    /* Sticky purchase sidebar */
+    .purchase-sidebar {
+        position: sticky; top: calc(var(--nav-height) + 1rem);
+    }
+
+    .purchase-card {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 20px; padding: 1.75rem;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+
+    .price-display {
+        text-align: center; margin-bottom: 1.5rem;
+        padding-bottom: 1.25rem;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .price-big {
+        font-size: 3rem; font-weight: 900;
+        letter-spacing: -0.05em;
+        background: linear-gradient(135deg, var(--amber), #d97706);
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        line-height: 1;
+    }
+    .price-unit { font-size: 0.8rem; color: var(--text-muted); margin-top: 0.25rem; }
+
+    .availability-section { margin-bottom: 1.25rem; }
+    .avail-header { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
+    .avail-header span { font-size: 0.8rem; color: var(--text-muted); }
+    .avail-header strong { font-size: 0.8rem; color: var(--text); font-weight: 600; }
+    .avail-bar { height: 6px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: hidden; }
+    .avail-fill { height: 100%; border-radius: 999px; transition: width 0.8s ease; }
+    .avail-fill.good   { background: linear-gradient(90deg, #10b981, #34d399); }
+    .avail-fill.low    { background: linear-gradient(90deg, var(--amber), #d97706); }
+    .avail-fill.danger { background: linear-gradient(90deg, var(--danger), #ef4444); }
+
+    .btn-buy {
+        width: 100%;
+        background: linear-gradient(135deg, var(--amber), #d97706);
+        color: #000; font-weight: 800; font-size: 1rem;
+        border: none; border-radius: 12px;
+        padding: 1rem; cursor: pointer;
+        box-shadow: 0 4px 20px rgba(245,158,11,0.3);
+        transition: all 0.2s ease;
+        font-family: inherit;
+        display: flex; align-items: center; justify-content: center; gap: 0.625rem;
+    }
+    .btn-buy:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(245,158,11,0.4); }
+    .btn-buy:active { transform: translateY(0); }
+    .btn-buy:disabled {
+        background: rgba(255,255,255,0.08); color: var(--text-dim);
+        cursor: not-allowed; box-shadow: none; transform: none;
+    }
+
+    .buy-note {
+        font-size: 0.75rem; color: var(--text-dim);
+        text-align: center; margin-top: 0.875rem;
+        display: flex; align-items: center; justify-content: center; gap: 0.375rem;
+    }
+
+    .sidebar-meta { display: flex; flex-direction: column; gap: 0.625rem; margin-bottom: 1.5rem; }
+    .sidebar-meta-item { display: flex; align-items: center; gap: 0.625rem; font-size: 0.85rem; }
+    .sidebar-meta-item i { color: var(--primary-light); width: 16px; font-size: 0.9rem; }
+    .sidebar-meta-item span { color: var(--text-muted); }
+    .sidebar-meta-item strong { color: var(--text); margin-left: auto; font-size: 0.82rem; }
+
+    @media (max-width: 900px) {
+        .event-detail-grid { grid-template-columns: 1fr; }
+        .purchase-sidebar { position: static; }
+        .info-grid { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+{#
+    Variables Twig attendues :
+    - evenement : Evenement
+    - tickets_restants : int
+    - deja_acheteur : bool (si l'utilisateur a déjà acheté un billet)
+#}
+<div class="event-detail-layout animate-fade-up">
+
+    {# Breadcrumb #}
+    <div style="margin-bottom:1.25rem;font-size:0.82rem;color:var(--text-dim);display:flex;align-items:center;gap:0.5rem;">
+        <a href="{{ path('app_acheteur') }}" style="color:var(--text-muted);text-decoration:none;">
+            <i class="bi bi-calendar2-event"></i> Événements
+        </a>
+        <i class="bi bi-chevron-right" style="font-size:0.65rem;"></i>
+        <span style="color:var(--text);">{{ evenement.nom|length > 40 ? evenement.nom|slice(0,40) ~ '…' : evenement.nom }}</span>
+    </div>
+
+    {% set places_total = evenement.nombresPlaces ?? 0 %}
+    {% set places_restantes = tickets_restants ?? places_total %}
+    {% set places_vendues = places_total - places_restantes %}
+    {% set pct_rempli = places_total > 0 ? (places_vendues / places_total * 100)|round : 0 %}
+    {% set sold_out = places_restantes <= 0 %}
+
+    <div class="event-detail-grid">
+
+        {# ── Left column ── #}
+        <div>
+            {# Cover #}
+            <div class="event-cover-full">
+                {% if evenement.image %}
+                <img src="{{ asset('uploads/' ~ evenement.image) }}" alt="{{ evenement.nom }}">
+                <div class="event-cover-overlay-full"></div>
+                {% else %}
+                <div class="event-cover-full-placeholder">🎟</div>
+                {% endif %}
+            </div>
+
+            {# Main info #}
+            <div class="main-content-block">
+                <div class="event-tags">
+                    <span class="event-tag"><i class="bi bi-tag me-1"></i>{{ evenement.categorie.nomCategorie ?? 'Autre' }}</span>
+                    {% if not sold_out %}
+                    <span class="event-tag" style="background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.2);color:#34d399;">
+                        <i class="bi bi-check-circle me-1"></i>Disponible
+                    </span>
+                    {% else %}
+                    <span class="event-tag" style="background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.2);color:#f87171;">
+                        <i class="bi bi-x-circle me-1"></i>Complet
+                    </span>
+                    {% endif %}
+                </div>
+
+                <h1 class="event-title-main">{{ evenement.nom }}</h1>
+
+                <div class="organizer-row">
+                    <div class="organizer-avatar">{{ evenement.user.nom|slice(0,1)|upper }}</div>
+                    <div class="organizer-info">
+                        <span>Organisé par</span>
+                        <strong>{{ evenement.user.nom }} {{ evenement.user.prenom }}</strong>
+                    </div>
+                </div>
+
+                <div class="info-grid" style="margin-bottom:1.5rem;">
+                    <div class="info-item">
+                        <div class="info-item-label">Date</div>
+                        <div class="info-item-value"><i class="bi bi-calendar3"></i>{{ evenement.date|date('D d M Y') }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-item-label">Heure</div>
+                        <div class="info-item-value"><i class="bi bi-clock"></i>{{ evenement.date|date('H:i') }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-item-label">Lieu</div>
+                        <div class="info-item-value"><i class="bi bi-geo-alt"></i>{{ evenement.lieu }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-item-label">Capacité</div>
+                        <div class="info-item-value"><i class="bi bi-people"></i>{{ places_total }} places</div>
+                    </div>
+                </div>
+
+                <h3 style="font-size:0.875rem;font-weight:700;color:var(--text);letter-spacing:-0.01em;margin-bottom:0.875rem;">À propos de l'événement</h3>
+                <div class="event-description">{{ evenement.description ?? 'Aucune description disponible.' }}</div>
+            </div>
+        </div>
+
+        {# ── Right sidebar ── #}
+        <div class="purchase-sidebar">
+            <div class="purchase-card animate-fade-up delay-2">
+                <div class="price-display">
+                    <div class="price-big">
+                        {{ evenement.prixTicket == 0 ? 'Gratuit' : evenement.prixTicket ~ ' €' }}
+                    </div>
+                    {% if evenement.prixTicket > 0 %}
+                    <div class="price-unit">par billet</div>
+                    {% endif %}
+                </div>
+
+                <div class="sidebar-meta">
+                    <div class="sidebar-meta-item">
+                        <i class="bi bi-calendar3"></i>
+                        <span>Date</span>
+                        <strong>{{ evenement.date|date('d/m/Y') }}</strong>
+                    </div>
+                    <div class="sidebar-meta-item">
+                        <i class="bi bi-clock"></i>
+                        <span>Heure</span>
+                        <strong>{{ evenement.date|date('H:i') }}</strong>
+                    </div>
+                    <div class="sidebar-meta-item">
+                        <i class="bi bi-geo-alt"></i>
+                        <span>Lieu</span>
+                        <strong>{{ evenement.lieu|length > 20 ? evenement.lieu|slice(0,20) ~ '…' : evenement.lieu }}</strong>
+                    </div>
+                </div>
+
+                <div class="availability-section">
+                    <div class="avail-header">
+                        <span>{{ places_vendues }} vendus</span>
+                        <strong>{{ places_restantes }} restants</strong>
+                    </div>
+                    <div class="avail-bar">
+                        <div class="avail-fill {{ pct_rempli >= 100 ? 'danger' : (pct_rempli >= 80 ? 'low' : 'good') }}"
+                             style="width:{{ pct_rempli }}%;"></div>
+                    </div>
+                </div>
+
+                {% if deja_acheteur is defined and deja_acheteur %}
+                <div class="eo-alert success" style="margin-bottom:1rem;">
+                    <i class="bi bi-check-circle-fill"></i>
+                    Vous avez déjà un billet pour cet événement.
+                </div>
+                <a href="{{ path('app_acheteur_commandes') }}" class="btn-secondary-eo" style="width:100%;justify-content:center;font-size:0.9rem;">
+                    <i class="bi bi-ticket-perforated"></i> Voir mes billets
+                </a>
+                {% elseif sold_out %}
+                <button class="btn-buy" disabled>
+                    <i class="bi bi-x-circle"></i> Événement complet
+                </button>
+                {% else %}
+                <a href="{{ path('app_acheteur_acheter', {id: evenement.id}) }}" class="btn-buy" style="text-decoration:none;">
+                    <i class="bi bi-ticket-perforated-fill"></i>
+                    Acheter un billet
+                </a>
+                {% endif %}
+
+                <div class="buy-note">
+                    <i class="bi bi-shield-check"></i>
+                    Paiement sécurisé · Code unique garanti
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

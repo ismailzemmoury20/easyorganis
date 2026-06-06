@@ -1,0 +1,396 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Événements{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .browse-layout { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+
+    /* Hero banner */
+    .browse-hero {
+        background: linear-gradient(135deg, rgba(124,58,237,0.12) 0%, rgba(59,130,246,0.08) 100%);
+        border: 1px solid rgba(124,58,237,0.15);
+        border-radius: 20px;
+        padding: 3rem 2.5rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .browse-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%; right: -10%;
+        width: 400px; height: 400px;
+        background: radial-gradient(circle, rgba(124,58,237,0.15), transparent 70%);
+        pointer-events: none;
+    }
+    .browse-hero h1 {
+        font-size: 2.25rem; font-weight: 800;
+        letter-spacing: -0.04em; margin-bottom: 0.5rem;
+    }
+    .browse-hero h1 span {
+        background: linear-gradient(135deg, var(--primary-light), var(--blue));
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .browse-hero p { font-size: 1rem; color: var(--text-muted); margin: 0; }
+
+    /* Filters */
+    .filters-bar {
+        display: flex; align-items: center; gap: 0.75rem;
+        margin-bottom: 1.75rem;
+        flex-wrap: wrap;
+    }
+    .filter-input-wrap { position: relative; flex: 1; min-width: 220px; }
+    .filter-input-wrap .search-icon {
+        position: absolute; left: 0.875rem; top: 50%;
+        transform: translateY(-50%); color: var(--text-dim); font-size: 0.9rem;
+    }
+    .filter-input {
+        width: 100%;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        color: var(--text); border-radius: 10px;
+        padding: 0.65rem 1rem 0.65rem 2.5rem;
+        font-size: 0.875rem; font-family: inherit; outline: none;
+        transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .filter-input:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-glow);
+    }
+    .filter-input::placeholder { color: var(--text-dim); }
+    .filter-select {
+        background: rgba(255,255,255,0.04) !important;
+        border: 1px solid rgba(255,255,255,0.08) !important;
+        color: var(--text) !important; border-radius: 10px !important;
+        padding: 0.65rem 2rem 0.65rem 1rem !important;
+        font-size: 0.875rem !important; font-family: inherit; outline: none;
+        cursor: pointer;
+        appearance: none; -webkit-appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24'%3E%3Cpath fill='%2364748b' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") !important;
+        background-repeat: no-repeat !important;
+        background-position: right 0.75rem center !important;
+    }
+    .filter-select:focus { border-color: var(--primary) !important; box-shadow: 0 0 0 3px var(--primary-glow) !important; }
+    .filter-select option { background: #1a1a2e; }
+
+    /* Categories chips */
+    .cat-chips { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.75rem; }
+    .cat-chip {
+        font-size: 0.8rem; font-weight: 500;
+        padding: 0.3rem 0.875rem; border-radius: 999px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        color: var(--text-muted); cursor: pointer;
+        text-decoration: none; transition: all 0.15s ease;
+    }
+    .cat-chip:hover, .cat-chip.active {
+        background: rgba(124,58,237,0.12);
+        border-color: rgba(124,58,237,0.3);
+        color: var(--primary-light);
+    }
+
+    /* Results header */
+    .results-header {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-bottom: 1.25rem;
+    }
+    .results-count { font-size: 0.85rem; color: var(--text-muted); }
+    .results-count strong { color: var(--text); }
+
+    /* Event grid */
+    .events-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.25rem; }
+
+    .event-card {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 16px; overflow: hidden;
+        text-decoration: none;
+        transition: all 0.2s ease;
+        display: flex; flex-direction: column;
+    }
+    .event-card:hover {
+        border-color: rgba(139,92,246,0.35);
+        transform: translateY(-3px);
+        box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+    }
+
+    .card-cover {
+        height: 180px;
+        background: linear-gradient(135deg, rgba(124,58,237,0.3), rgba(59,130,246,0.3));
+        position: relative; overflow: hidden;
+    }
+    .card-cover img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
+    .event-card:hover .card-cover img { transform: scale(1.04); }
+    .card-cover-gradient {
+        position: absolute; inset: 0;
+        background: linear-gradient(to bottom, transparent 30%, rgba(6,6,15,0.85));
+    }
+    .card-cover-placeholder {
+        width: 100%; height: 100%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 3.5rem;
+    }
+    .card-cat-badge {
+        position: absolute; top: 0.75rem; left: 0.75rem;
+        font-size: 0.68rem; font-weight: 600;
+        background: rgba(0,0,0,0.55); color: var(--primary-light);
+        border: 1px solid rgba(139,92,246,0.3);
+        padding: 0.18rem 0.6rem; border-radius: 999px;
+        backdrop-filter: blur(8px);
+    }
+    .card-price-tag {
+        position: absolute; bottom: 0.75rem; right: 0.75rem;
+        font-size: 0.85rem; font-weight: 800;
+        background: linear-gradient(135deg, var(--amber), #d97706);
+        color: #000; padding: 0.2rem 0.6rem; border-radius: 8px;
+    }
+
+    .card-body { padding: 1.25rem; flex: 1; display: flex; flex-direction: column; }
+    .card-title {
+        font-size: 1rem; font-weight: 700; color: var(--text);
+        margin-bottom: 0.625rem; letter-spacing: -0.02em;
+        display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+    }
+    .card-meta { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 1rem; }
+    .card-meta-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; color: var(--text-muted); }
+    .card-meta-item i { color: var(--text-dim); width: 14px; font-size: 0.72rem; }
+
+    .card-spots {
+        margin-top: auto; padding-top: 0.875rem;
+        border-top: 1px solid rgba(255,255,255,0.06);
+        display: flex; align-items: center; justify-content: space-between;
+    }
+    .spots-bar-wrap { flex: 1; margin-right: 0.75rem; }
+    .spots-bar {
+        height: 4px; background: rgba(255,255,255,0.08); border-radius: 999px; overflow: hidden;
+    }
+    .spots-fill {
+        height: 100%; border-radius: 999px;
+        background: linear-gradient(90deg, var(--success), #34d399);
+        transition: width 0.6s ease;
+    }
+    .spots-fill.low { background: linear-gradient(90deg, var(--amber), #d97706); }
+    .spots-fill.full { background: linear-gradient(90deg, var(--danger), #ef4444); }
+    .spots-label { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.25rem; }
+    .card-cta {
+        font-size: 0.78rem; font-weight: 600;
+        background: rgba(124,58,237,0.15);
+        color: var(--primary-light);
+        border: 1px solid rgba(124,58,237,0.25);
+        padding: 0.35rem 0.75rem; border-radius: 8px;
+        text-decoration: none; white-space: nowrap;
+        transition: all 0.15s;
+    }
+    .card-cta:hover { background: rgba(124,58,237,0.25); color: var(--primary-light); }
+    .card-cta.sold-out { background: rgba(239,68,68,0.1); color: #f87171; border-color: rgba(239,68,68,0.2); pointer-events: none; }
+
+    /* Pagination */
+    .pagination-wrap { display: flex; justify-content: center; gap: 0.375rem; margin-top: 2.5rem; }
+    .page-btn {
+        width: 36px; height: 36px; border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.85rem; font-weight: 500;
+        text-decoration: none; color: var(--text-muted);
+        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(255,255,255,0.04);
+        transition: all 0.15s ease;
+    }
+    .page-btn:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+    .page-btn.active {
+        background: var(--primary); color: #fff;
+        border-color: var(--primary);
+        box-shadow: 0 4px 15px var(--primary-glow);
+    }
+
+    .empty-state { text-align: center; padding: 5rem 2rem; }
+    .empty-state .empty-icon { font-size: 3.5rem; margin-bottom: 1rem; }
+    .empty-state h3 { font-size: 1.2rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .empty-state p { font-size: 0.875rem; color: var(--text-muted); }
+
+    @media (max-width: 768px) {
+        .browse-hero { padding: 2rem 1.5rem; }
+        .browse-hero h1 { font-size: 1.6rem; }
+        .events-grid { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+{#
+    Variables Twig attendues :
+    - evenements : collection paginée d'Evenements
+    - categories : collection de Categories
+    - total : int
+    - page_actuelle : int
+    - total_pages : int
+    - recherche : string
+    - categorie_filtre : int|null
+#}
+<div class="browse-layout animate-fade-up">
+
+    {# Hero #}
+    <div class="browse-hero">
+        <h1>Découvrez des <span>événements</span> uniques</h1>
+        <p>{{ total ?? evenements|length }} événements disponibles près de chez vous</p>
+    </div>
+
+    {# Filters #}
+    <form action="{{ path('app_acheteur') }}" method="GET">
+        <div class="filters-bar">
+            <div class="filter-input-wrap">
+                <i class="bi bi-search search-icon"></i>
+                <input
+                    type="text"
+                    name="q"
+                    class="filter-input"
+                    placeholder="Rechercher un événement, un lieu…"
+                    value="{{ recherche ?? app.request.query.get('q') }}"
+                >
+            </div>
+            <select name="categorie" class="filter-select">
+                <option value="">Toutes les catégories</option>
+                {% for categorie in categories %}
+                <option value="{{ categorie.id }}" {{ (categorie_filtre ?? app.request.query.get('categorie')) == categorie.id ? 'selected' : '' }}>
+                    {{ categorie.nomCategorie }}
+                </option>
+                {% endfor %}
+            </select>
+            <select name="prix" class="filter-select">
+                <option value="">Tous les prix</option>
+                <option value="free" {{ app.request.query.get('prix') == 'free' ? 'selected' : '' }}>Gratuit</option>
+                <option value="low" {{ app.request.query.get('prix') == 'low' ? 'selected' : '' }}>Moins de 20€</option>
+                <option value="mid" {{ app.request.query.get('prix') == 'mid' ? 'selected' : '' }}>20€ – 50€</option>
+                <option value="high" {{ app.request.query.get('prix') == 'high' ? 'selected' : '' }}>Plus de 50€</option>
+            </select>
+            <button type="submit" class="btn-primary-eo" style="padding:0.65rem 1.25rem;font-size:0.875rem;">
+                <i class="bi bi-funnel"></i> Filtrer
+            </button>
+        </div>
+    </form>
+
+    {# Category chips #}
+    {% if categories is defined and categories|length > 0 %}
+    <div class="cat-chips">
+        <a href="{{ path('app_acheteur') }}" class="cat-chip {{ not (categorie_filtre ?? app.request.query.get('categorie')) ? 'active' : '' }}">
+            Tout voir
+        </a>
+        {% for categorie in categories %}
+        <a href="{{ path('app_acheteur', {categorie: categorie.id}) }}"
+           class="cat-chip {{ (categorie_filtre ?? app.request.query.get('categorie')) == categorie.id ? 'active' : '' }}">
+            {{ categorie.nomCategorie }}
+        </a>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {# Results header #}
+    <div class="results-header">
+        <div class="results-count">
+            <strong>{{ total ?? evenements|length }}</strong> événement{{ (total ?? evenements|length) > 1 ? 's' : '' }} trouvé{{ (total ?? evenements|length) > 1 ? 's' : '' }}
+        </div>
+    </div>
+
+    {# Events #}
+    {% if evenements is empty %}
+    <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <h3>Aucun événement trouvé</h3>
+        <p>Essayez d'autres filtres ou revenez plus tard.</p>
+    </div>
+    {% else %}
+    <div class="events-grid">
+        {% for evenement in evenements %}
+        {% set places_total = evenement.nombresPlaces ?? 0 %}
+        {% set places_vendues = evenement.ticketsVendus ?? 0 %}
+        {% set places_restantes = places_total - places_vendues %}
+        {% set pct_rempli = places_total > 0 ? (places_vendues / places_total * 100)|round : 0 %}
+        {% set sold_out = places_restantes <= 0 %}
+
+        <a href="{{ path('app_acheteur_evenements_details', {id: evenement.id}) }}" class="event-card animate-fade-up" style="animation-delay:{{ loop.index * 0.04 }}s;">
+            <div class="card-cover">
+                {% if evenement.image %}
+                <img src="{{ asset('uploads/' ~ evenement.image) }}" alt="{{ evenement.nom }}" loading="lazy">
+                <div class="card-cover-gradient"></div>
+                {% else %}
+                <div class="card-cover-placeholder">🎟</div>
+                {% endif %}
+                <span class="card-cat-badge">{{ evenement.categorie.nomCategorie ?? 'Autre' }}</span>
+                <span class="card-price-tag">
+                    {{ evenement.prixTicket == 0 ? 'Gratuit' : evenement.prixTicket ~ ' €' }}
+                </span>
+            </div>
+
+            <div class="card-body">
+                <div class="card-title">{{ evenement.nom }}</div>
+                <div class="card-meta">
+                    <div class="card-meta-item">
+                        <i class="bi bi-calendar3"></i>
+                        {{ evenement.date|date('d M Y') }}
+                    </div>
+                    <div class="card-meta-item">
+                        <i class="bi bi-clock"></i>
+                        {{ evenement.date|date('H:i') }}
+                    </div>
+                    <div class="card-meta-item">
+                        <i class="bi bi-geo-alt"></i>
+                        {{ evenement.lieu }}
+                    </div>
+                </div>
+
+                <div class="card-spots">
+                    <div class="spots-bar-wrap">
+                        <div class="spots-bar">
+                            <div class="spots-fill {{ pct_rempli >= 100 ? 'full' : (pct_rempli >= 80 ? 'low' : '') }}"
+                                 style="width:{{ pct_rempli }}%;"></div>
+                        </div>
+                        <div class="spots-label">
+                            {% if sold_out %}
+                                <span style="color:#f87171;">Complet</span>
+                            {% elseif pct_rempli >= 80 %}
+                                <span style="color:var(--amber);">Plus que {{ places_restantes }} place{{ places_restantes > 1 ? 's' : '' }}</span>
+                            {% else %}
+                                {{ places_restantes }} place{{ places_restantes > 1 ? 's' : '' }} disponibles
+                            {% endif %}
+                        </div>
+                    </div>
+                    <span class="card-cta {{ sold_out ? 'sold-out' : '' }}">
+                        {{ sold_out ? 'Complet' : 'Voir →' }}
+                    </span>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+
+    {# Pagination #}
+    {% if total_pages is defined and total_pages > 1 %}
+    <div class="pagination-wrap">
+        {% if page_actuelle > 1 %}
+        <a href="{{ path('app_acheteur', {page: page_actuelle - 1, q: recherche, categorie: categorie_filtre}) }}" class="page-btn">
+            <i class="bi bi-chevron-left"></i>
+        </a>
+        {% endif %}
+
+        {% for p in 1..total_pages %}
+            {% if p == page_actuelle %}
+            <span class="page-btn active">{{ p }}</span>
+            {% elseif p == 1 or p == total_pages or (p >= page_actuelle - 2 and p <= page_actuelle + 2) %}
+            <a href="{{ path('app_acheteur', {page: p, q: recherche, categorie: categorie_filtre}) }}" class="page-btn">{{ p }}</a>
+            {% elseif p == page_actuelle - 3 or p == page_actuelle + 3 %}
+            <span class="page-btn" style="pointer-events:none;color:var(--text-dim);">…</span>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_actuelle < total_pages %}
+        <a href="{{ path('app_acheteur', {page: page_actuelle + 1, q: recherche, categorie: categorie_filtre}) }}" class="page-btn">
+            <i class="bi bi-chevron-right"></i>
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% endif %}
+
+</div>
+{% endblock %}

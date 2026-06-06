@@ -1,0 +1,277 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Variations de billets — {{ evenement.nom }}{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .variation-layout {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 0 1.5rem 3rem;
+    }
+
+    /* Form card */
+    .variation-form-card {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+    .variation-form-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        display: flex; align-items: center; gap: 0.875rem;
+    }
+    .variation-form-header-icon {
+        width: 40px; height: 40px; border-radius: 12px;
+        background: linear-gradient(135deg, var(--primary), var(--blue));
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.1rem; flex-shrink: 0;
+    }
+    .variation-form-header h2 {
+        font-size: 1rem; font-weight: 700; color: var(--text); margin: 0;
+    }
+    .variation-form-header p {
+        font-size: 0.8rem; color: var(--text-muted); margin: 0;
+    }
+    .variation-form-body {
+        padding: 1.5rem;
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr auto;
+        gap: 1rem;
+        align-items: end;
+    }
+
+    .form-group-inline label {
+        display: block;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 0.4rem;
+    }
+    .form-group-inline input {
+        width: 100%;
+        padding: 0.625rem 0.875rem;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 10px;
+        color: var(--text);
+        font-size: 0.9rem;
+        transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .form-group-inline input:focus {
+        outline: none;
+        border-color: rgba(124,58,237,0.5);
+        box-shadow: 0 0 0 3px rgba(124,58,237,0.12);
+    }
+
+    .btn-add-variation {
+        padding: 0.625rem 1.25rem;
+        background: linear-gradient(135deg, var(--primary), var(--blue));
+        border: none; border-radius: 10px;
+        color: #fff; font-size: 0.875rem; font-weight: 700;
+        cursor: pointer; white-space: nowrap;
+        display: inline-flex; align-items: center; gap: 0.5rem;
+        transition: opacity 0.15s, transform 0.15s;
+        box-shadow: 0 4px 14px rgba(124,58,237,0.3);
+    }
+    .btn-add-variation:hover { opacity: 0.88; transform: translateY(-1px); }
+
+    /* Variations list */
+    .variations-list-card {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 20px;
+        overflow: hidden;
+    }
+    .variations-list-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        display: flex; align-items: center; justify-content: space-between;
+    }
+    .variations-list-header h2 {
+        font-size: 1rem; font-weight: 700; color: var(--text); margin: 0;
+        display: flex; align-items: center; gap: 0.5rem;
+    }
+    .count-badge {
+        font-size: 0.72rem; font-weight: 700;
+        background: rgba(124,58,237,0.15);
+        color: var(--primary-light);
+        border: 1px solid rgba(124,58,237,0.25);
+        padding: 0.15rem 0.6rem; border-radius: 999px;
+    }
+
+    .variation-row {
+        display: grid;
+        grid-template-columns: 1fr 120px 120px;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid rgba(255,255,255,0.04);
+        transition: background 0.15s;
+        gap: 1rem;
+    }
+    .variation-row:hover { background: rgba(255,255,255,0.02); }
+    .variation-row:last-child { border-bottom: none; }
+
+    .variation-name {
+        font-size: 0.95rem; font-weight: 600; color: var(--text);
+        display: flex; align-items: center; gap: 0.625rem;
+    }
+    .variation-name-icon {
+        width: 34px; height: 34px; border-radius: 10px;
+        background: rgba(124,58,237,0.1);
+        border: 1px solid rgba(124,58,237,0.2);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.85rem; color: var(--primary-light); flex-shrink: 0;
+    }
+
+    .variation-price {
+        font-size: 1rem; font-weight: 800; color: var(--amber);
+        text-align: right;
+    }
+    .variation-stock {
+        text-align: right;
+    }
+    .stock-pill {
+        display: inline-flex; align-items: center; gap: 0.35rem;
+        font-size: 0.78rem; font-weight: 600;
+        padding: 0.25rem 0.75rem; border-radius: 999px;
+    }
+    .stock-pill.ok {
+        background: rgba(16,185,129,0.1);
+        color: #34d399;
+        border: 1px solid rgba(16,185,129,0.2);
+    }
+    .stock-pill.low {
+        background: rgba(245,158,11,0.1);
+        color: #f59e0b;
+        border: 1px solid rgba(245,158,11,0.2);
+    }
+    .stock-pill.empty {
+        background: rgba(239,68,68,0.1);
+        color: #f87171;
+        border: 1px solid rgba(239,68,68,0.2);
+    }
+
+    .empty-state {
+        padding: 3rem; text-align: center;
+        color: var(--text-muted); font-size: 0.875rem;
+    }
+    .empty-state i { font-size: 2.5rem; color: var(--text-dim); display: block; margin-bottom: 0.75rem; }
+
+    @media (max-width: 640px) {
+        .variation-form-body { grid-template-columns: 1fr; }
+        .variation-row { grid-template-columns: 1fr 1fr; }
+        .variation-stock { display: none; }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="variation-layout animate-fade-up">
+
+    {# Breadcrumb #}
+    <div style="margin-bottom:1.25rem;font-size:0.82rem;color:var(--text-dim);display:flex;align-items:center;gap:0.5rem;">
+        <a href="{{ path('app_organisateur_evenements') }}" style="color:var(--text-muted);text-decoration:none;">
+            <i class="bi bi-grid-3x3-gap"></i> Mes événements
+        </a>
+        <i class="bi bi-chevron-right" style="font-size:0.65rem;"></i>
+        <a href="{{ path('app_organisateur_evenements_details', {id: evenement.id}) }}" style="color:var(--text-muted);text-decoration:none;">
+            {{ evenement.nom }}
+        </a>
+        <i class="bi bi-chevron-right" style="font-size:0.65rem;"></i>
+        <span style="color:var(--text);">Variations de billets</span>
+    </div>
+
+    {# Page header #}
+    <div class="page-header" style="padding-top:0;margin-bottom:1.75rem;">
+        <h1>Variations de billets</h1>
+        <p>Définissez différentes catégories de billets pour <strong style="color:var(--text);">{{ evenement.nom }}</strong></p>
+    </div>
+
+    {# Add variation form #}
+    <div class="variation-form-card animate-fade-up delay-1">
+        <div class="variation-form-header">
+            <div class="variation-form-header-icon">🎫</div>
+            <div>
+                <h2>Ajouter une variation</h2>
+                <p>Ex : VIP, Standard, Early Bird…</p>
+            </div>
+        </div>
+        <div class="variation-form-body">
+            {{ form_start(form) }}
+
+            <div class="form-group-inline">
+                {{ form_label(form.nom, 'Nom de la variation') }}
+                {{ form_widget(form.nom, {'attr': {'placeholder': 'Ex : VIP, Standard…'}}) }}
+                {{ form_errors(form.nom) }}
+            </div>
+
+            <div class="form-group-inline">
+                {{ form_label(form.prix, 'Prix (€)') }}
+                {{ form_widget(form.prix, {'attr': {'placeholder': '0.00', 'step': '0.01', 'min': '0'}}) }}
+                {{ form_errors(form.prix) }}
+            </div>
+
+            <div class="form-group-inline">
+                {{ form_label(form.stock, 'Nombre de places') }}
+                {{ form_widget(form.stock, {'attr': {'placeholder': '100', 'min': '1'}}) }}
+                {{ form_errors(form.stock) }}
+            </div>
+
+            <div>
+                <button type="submit" class="btn-add-variation">
+                    <i class="bi bi-plus-lg"></i> Ajouter
+                </button>
+            </div>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+
+    {# Existing variations #}
+    <div class="variations-list-card animate-fade-up delay-2">
+        <div class="variations-list-header">
+            <h2>
+                <i class="bi bi-layers-fill" style="color:var(--primary-light);"></i>
+                Variations existantes
+                <span class="count-badge">{{ evenement.ticketsVariations|length }}</span>
+            </h2>
+        </div>
+
+        {% if evenement.ticketsVariations is empty %}
+        <div class="empty-state">
+            <i class="bi bi-ticket-perforated"></i>
+            Aucune variation pour l'instant. Ajoutez-en une ci-dessus.
+        </div>
+        {% else %}
+        {% for variation in evenement.ticketsVariations %}
+        <div class="variation-row">
+            <div class="variation-name">
+                <div class="variation-name-icon">
+                    <i class="bi bi-ticket-fill"></i>
+                </div>
+                {{ variation.nom }}
+            </div>
+            <div class="variation-price">
+                {{ variation.prix|number_format(2, '.', ' ') }} €
+            </div>
+            <div class="variation-stock">
+                {% if variation.stock == 0 %}
+                    <span class="stock-pill empty"><i class="bi bi-x-circle-fill"></i> Épuisé</span>
+                {% elseif variation.stock <= 10 %}
+                    <span class="stock-pill low"><i class="bi bi-exclamation-circle-fill"></i> {{ variation.stock }} restants</span>
+                {% else %}
+                    <span class="stock-pill ok"><i class="bi bi-check-circle-fill"></i> {{ variation.stock }} places</span>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

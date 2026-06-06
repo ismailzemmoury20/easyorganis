@@ -1,0 +1,265 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier — {{ evenement.nom }}{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .edit-layout { max-width: 860px; margin: 0 auto; padding: 0 1.5rem; }
+
+    .section-block {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 16px;
+        padding: 2rem;
+        margin-bottom: 1.25rem;
+        transition: border-color 0.2s ease;
+    }
+    .section-block:hover { border-color: rgba(139,92,246,0.2); }
+
+    .section-header {
+        display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem;
+    }
+    .section-num {
+        width: 28px; height: 28px;
+        background: linear-gradient(135deg, var(--primary), var(--blue));
+        border-radius: 8px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.75rem; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+    .section-header h2 { font-size: 1rem; font-weight: 700; color: var(--text); margin: 0; letter-spacing: -0.02em; }
+    .section-header p { font-size: 0.8rem; color: var(--text-muted); margin: 0; }
+
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-group-eo { margin-bottom: 1.125rem; }
+
+    .form-group-eo .form-control,
+    .form-group-eo .form-select,
+    .form-group-eo textarea.form-control {
+        background: rgba(255,255,255,0.04) !important;
+        border: 1px solid rgba(255,255,255,0.08) !important;
+        color: var(--text) !important;
+        border-radius: 10px !important;
+        font-size: 0.9rem !important;
+    }
+    .form-group-eo .form-control:focus,
+    .form-group-eo .form-select:focus,
+    .form-group-eo textarea.form-control:focus {
+        border-color: var(--primary) !important;
+        box-shadow: 0 0 0 3px var(--primary-glow) !important;
+    }
+    textarea.form-control { min-height: 120px; resize: vertical; }
+    select.form-select option { background: #1a1a2e; color: var(--text); }
+
+    .current-image-preview {
+        display: flex; align-items: center; gap: 1rem;
+        padding: 0.875rem;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 10px;
+        margin-bottom: 1rem;
+    }
+    .current-image-preview img {
+        width: 60px; height: 60px; object-fit: cover;
+        border-radius: 8px;
+    }
+    .current-image-preview .img-info { flex: 1; }
+    .current-image-preview .img-info span {
+        font-size: 0.82rem; color: var(--text-muted); display: block; margin-bottom: 0.25rem;
+    }
+    .current-image-preview .img-info strong { font-size: 0.85rem; color: var(--text); }
+
+    .price-input-wrap { position: relative; }
+    .price-suffix {
+        position: absolute; right: 1rem; top: 50%;
+        transform: translateY(-50%);
+        font-size: 0.85rem; font-weight: 600; color: var(--amber);
+    }
+
+    .edit-warning {
+        background: rgba(245,158,11,0.08);
+        border: 1px solid rgba(245,158,11,0.2);
+        color: var(--amber); border-radius: 10px;
+        padding: 0.875rem 1rem; font-size: 0.85rem;
+        display: flex; align-items: center; gap: 0.625rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-actions {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-top: 1.5rem; padding-top: 1.5rem;
+        border-top: 1px solid rgba(255,255,255,0.08);
+        flex-wrap: wrap; gap: 0.75rem;
+    }
+    .actions-right { display: flex; gap: 0.75rem; }
+
+    @media (max-width: 600px) {
+        .field-row { grid-template-columns: 1fr; }
+        .form-actions { flex-direction: column; }
+        .actions-right { width: 100%; flex-direction: column; }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+{#
+    Variables Twig attendues :
+    - form : EvenementType (pré-rempli avec données existantes)
+    - evenement : Evenement (pour afficher l'image actuelle)
+#}
+<div class="edit-layout animate-fade-up">
+
+    {# Breadcrumb #}
+    <div style="margin-bottom:1.25rem;font-size:0.82rem;color:var(--text-dim);display:flex;align-items:center;gap:0.5rem;">
+        <a href="{{ path('app_organisateur_evenements') }}" style="color:var(--text-muted);text-decoration:none;">
+            <i class="bi bi-grid-3x3-gap"></i> Mes événements
+        </a>
+        <i class="bi bi-chevron-right" style="font-size:0.65rem;"></i>
+        <a href="{{ path('app_organisateur_evenements_details', {id: evenement.id}) }}" style="color:var(--text-muted);text-decoration:none;">
+            {{ evenement.nom|length > 30 ? evenement.nom|slice(0,30) ~ '…' : evenement.nom }}
+        </a>
+        <i class="bi bi-chevron-right" style="font-size:0.65rem;"></i>
+        <span style="color:var(--text);">Modifier</span>
+    </div>
+
+    {# Header #}
+    <div class="page-header">
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.5rem;">
+            <div style="width:36px;height:36px;background:linear-gradient(135deg,var(--amber),#d97706);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;">✏️</div>
+            <h1>Modifier l'événement</h1>
+        </div>
+        <p>Les modifications seront visibles immédiatement sur la plateforme</p>
+    </div>
+
+    <div class="edit-warning">
+        <i class="bi bi-exclamation-triangle-fill"></i>
+        Modifier le prix ou le nombre de places peut affecter les billets déjà vendus. Procédez avec précaution.
+    </div>
+
+    {{ form_start(form, {'attr': {'enctype': 'multipart/form-data', 'novalidate': 'novalidate'}}) }}
+
+        {# Section 1 #}
+        <div class="section-block animate-fade-up delay-1">
+            <div class="section-header">
+                <div class="section-num">1</div>
+                <div>
+                    <h2>Informations générales</h2>
+                    <p>Nom, catégorie et description</p>
+                </div>
+            </div>
+
+            <div class="form-group-eo">
+                {{ form_label(form.nom, 'Nom de l\'événement', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.nom, {'attr': {'class': 'form-control'}}) }}
+                {{ form_errors(form.nom) }}
+            </div>
+
+            <div class="form-group-eo">
+                {{ form_label(form.categorie, 'Catégorie', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.categorie, {'attr': {'class': 'form-select'}}) }}
+                {{ form_errors(form.categorie) }}
+            </div>
+
+            <div class="form-group-eo">
+                {{ form_label(form.description, 'Description', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.description, {'attr': {'class': 'form-control', 'rows': '5'}}) }}
+                {{ form_errors(form.description) }}
+            </div>
+        </div>
+
+        {# Section 2 #}
+        <div class="section-block animate-fade-up delay-2">
+            <div class="section-header">
+                <div class="section-num">2</div>
+                <div>
+                    <h2>Date & Lieu</h2>
+                    <p>Quand et où se déroule l'événement</p>
+                </div>
+            </div>
+
+            <div class="field-row">
+                <div class="form-group-eo">
+                    {{ form_label(form.date, 'Date', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.date, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.date) }}
+                </div>
+                <div class="form-group-eo">
+                    {{ form_label(form.lieu, 'Lieu', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.lieu, {'attr': {'class': 'form-control'}}) }}
+                    {{ form_errors(form.lieu) }}
+                </div>
+            </div>
+        </div>
+
+        {# Section 3 #}
+        <div class="section-block animate-fade-up delay-3">
+            <div class="section-header">
+                <div class="section-num">3</div>
+                <div>
+                    <h2>Billetterie</h2>
+                    <p>Prix et capacité</p>
+                </div>
+            </div>
+
+            <div class="field-row">
+                <div class="form-group-eo">
+                    {{ form_label(form.nombres_places, 'Nombre de places', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.nombres_places, {'attr': {'class': 'form-control', 'min': '1'}}) }}
+                    {{ form_errors(form.nombres_places) }}
+                </div>
+                <div class="form-group-eo">
+                    {{ form_label(form.prix_ticket, 'Prix du ticket (€)', {'label_attr': {'class': 'form-label'}}) }}
+                    <div class="price-input-wrap">
+                        {{ form_widget(form.prix_ticket, {'attr': {'class': 'form-control', 'step': '0.01', 'min': '0'}}) }}
+                        <span class="price-suffix">€</span>
+                    </div>
+                    {{ form_errors(form.prix_ticket) }}
+                </div>
+            </div>
+        </div>
+
+        {# Section 4 – Image #}
+        <div class="section-block animate-fade-up delay-4">
+            <div class="section-header">
+                <div class="section-num">4</div>
+                <div>
+                    <h2>Visuel</h2>
+                    <p>Laissez vide pour conserver l'image actuelle</p>
+                </div>
+            </div>
+
+            {% if evenement.image %}
+            <div class="current-image-preview">
+                <img src="{{ asset('uploads/' ~ evenement.image) }}" alt="Image actuelle">
+                <div class="img-info">
+                    <span>Image actuelle</span>
+                    <strong>{{ evenement.image }}</strong>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="form-group-eo">
+                {{ form_widget(form.image, {'attr': {'class': 'form-control', 'accept': 'image/*'}}) }}
+                {{ form_errors(form.image) }}
+            </div>
+        </div>
+
+        {# Actions #}
+        <div class="form-actions">
+            <a href="{{ path('app_organisateur_evenements_details', {id: evenement.id}) }}" class="btn-secondary-eo">
+                <i class="bi bi-arrow-left"></i> Annuler
+            </a>
+            <div class="actions-right">
+                <a href="{{ path('app_organisateur_supprimer', {id: evenement.id}) }}"
+                   class="btn-danger-eo"
+                   onclick="return confirm('Supprimer définitivement cet événement ?')">
+                    <i class="bi bi-trash"></i> Supprimer
+                </a>
+                <button type="submit" class="btn-primary-eo">
+                    <i class="bi bi-check-lg"></i> Sauvegarder
+                </button>
+            </div>
+        </div>
+
+    {{ form_end(form) }}
+</div>
+{% endblock %}

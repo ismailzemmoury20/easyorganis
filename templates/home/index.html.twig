@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EasyOrganis — Créez & Vivez des Événements Inoubliables</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #7c3aed;
+            --primary-light: #a78bfa;
+            --primary-glow: rgba(124,58,237,0.25);
+            --blue: #3b82f6;
+            --blue-light: #60a5fa;
+            --amber: #f59e0b;
+            --bg: #06060f;
+            --surface: rgba(255,255,255,0.04);
+            --border: rgba(255,255,255,0.08);
+            --text: #f1f0ff;
+            --text-muted: #9896b8;
+            --text-dim: #5c5a7a;
+            --gradient: linear-gradient(135deg, var(--primary), var(--blue));
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        /* ── Ambient background ── */
+        .ambient {
+            position: fixed; inset: 0; pointer-events: none; z-index: 0;
+            overflow: hidden;
+        }
+        .blob {
+            position: absolute; border-radius: 50%;
+            filter: blur(120px); opacity: 0.18;
+        }
+        .blob-1 { width: 600px; height: 600px; background: var(--primary); top: -200px; left: -150px; animation: drift1 18s ease-in-out infinite alternate; }
+        .blob-2 { width: 500px; height: 500px; background: var(--blue); bottom: -150px; right: -100px; animation: drift2 22s ease-in-out infinite alternate; }
+        .blob-3 { width: 350px; height: 350px; background: var(--amber); top: 40%; left: 50%; transform: translate(-50%,-50%); animation: drift3 14s ease-in-out infinite alternate; opacity: 0.08; }
+        @keyframes drift1 { from{transform:translate(0,0) scale(1)} to{transform:translate(60px,40px) scale(1.1)} }
+        @keyframes drift2 { from{transform:translate(0,0) scale(1)} to{transform:translate(-40px,-60px) scale(1.15)} }
+        @keyframes drift3 { from{transform:translate(-50%,-50%) scale(1)} to{transform:translate(-45%,-55%) scale(1.2)} }
+
+        /* ── Navbar ── */
+        nav {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+            padding: 1rem 2rem;
+            display: flex; align-items: center; justify-content: space-between;
+            background: rgba(6,6,15,0.6);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+        .nav-logo {
+            display: flex; align-items: center; gap: 0.625rem;
+            text-decoration: none;
+        }
+        .logo-icon {
+            width: 34px; height: 34px;
+            background: var(--gradient);
+            border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1rem;
+        }
+        .logo-text {
+            font-size: 1.1rem; font-weight: 800;
+            letter-spacing: -0.03em; color: var(--text);
+        }
+        .logo-text span { color: var(--primary-light); }
+        .nav-links {
+            display: flex; align-items: center; gap: 1.5rem;
+            list-style: none;
+        }
+        .nav-links a {
+            font-size: 0.875rem; font-weight: 500;
+            color: var(--text-muted); text-decoration: none;
+            transition: color 0.15s;
+        }
+        .nav-links a:hover { color: var(--text); }
+        .nav-cta { display: flex; align-items: center; gap: 0.75rem; }
+        .btn-ghost {
+            font-size: 0.875rem; font-weight: 600;
+            color: var(--text-muted); text-decoration: none;
+            padding: 0.45rem 1rem; border-radius: 8px;
+            border: 1px solid var(--border);
+            background: transparent;
+            transition: all 0.15s;
+        }
+        .btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.18); background: var(--surface); }
+        .btn-primary-land {
+            font-size: 0.875rem; font-weight: 700;
+            color: #fff; text-decoration: none;
+            padding: 0.45rem 1.25rem; border-radius: 8px;
+            background: var(--gradient);
+            border: none; cursor: pointer;
+            transition: opacity 0.15s, transform 0.15s;
+            box-shadow: 0 0 20px var(--primary-glow);
+        }
+        .btn-primary-land:hover { opacity: 0.88; transform: translateY(-1px); color: #fff; }
+
+        /* ── Sections wrapper ── */
+        section { position: relative; z-index: 1; }
+
+        /* ── Hero ── */
+        .hero {
+            min-height: 100vh;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            text-align: center;
+            padding: 8rem 1.5rem 5rem;
+        }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            font-size: 0.78rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+            color: var(--primary-light);
+            background: rgba(124,58,237,0.1);
+            border: 1px solid rgba(124,58,237,0.25);
+            padding: 0.35rem 0.9rem; border-radius: 999px;
+            margin-bottom: 2rem;
+        }
+        .hero-badge i { font-size: 0.75rem; }
+        .hero-title {
+            font-size: clamp(2.5rem, 6vw, 5rem);
+            font-weight: 900; letter-spacing: -0.04em;
+            line-height: 1.05;
+            margin-bottom: 1.5rem;
+            max-width: 860px;
+        }
+        .hero-title .gradient-text {
+            background: var(--gradient);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero-subtitle {
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            color: var(--text-muted); line-height: 1.7;
+            max-width: 560px; margin: 0 auto 2.5rem;
+        }
+        .hero-actions {
+            display: flex; align-items: center; justify-content: center;
+            gap: 1rem; flex-wrap: wrap; margin-bottom: 4rem;
+        }
+        .btn-hero-primary {
+            font-size: 1rem; font-weight: 700;
+            color: #fff; text-decoration: none;
+            padding: 0.85rem 2rem; border-radius: 12px;
+            background: var(--gradient);
+            border: none;
+            display: flex; align-items: center; gap: 0.5rem;
+            transition: opacity 0.15s, transform 0.15s;
+            box-shadow: 0 8px 32px var(--primary-glow);
+        }
+        .btn-hero-primary:hover { opacity: 0.88; transform: translateY(-2px); color: #fff; }
+        .btn-hero-secondary {
+            font-size: 1rem; font-weight: 600;
+            color: var(--text-muted); text-decoration: none;
+            padding: 0.85rem 2rem; border-radius: 12px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            display: flex; align-items: center; gap: 0.5rem;
+            transition: all 0.15s;
+        }
+        .btn-hero-secondary:hover { color: var(--text); border-color: rgba(255,255,255,0.18); }
+
+        /* Stats bar */
+        .hero-stats {
+            display: flex; align-items: center; justify-content: center;
+            gap: 2.5rem; flex-wrap: wrap;
+        }
+        .hero-stat { text-align: center; }
+        .hero-stat-value {
+            font-size: 1.75rem; font-weight: 800;
+            letter-spacing: -0.04em;
+            background: var(--gradient);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero-stat-label { font-size: 0.78rem; color: var(--text-dim); margin-top: 0.1rem; }
+        .hero-stat-divider { width: 1px; height: 40px; background: var(--border); }
+
+        /* ── Floating mockup ── */
+        .hero-visual {
+            position: relative; max-width: 900px; width: 100%;
+            margin: 4rem auto 0;
+        }
+        .mockup-frame {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 40px 120px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
+        }
+        .mockup-bar {
+            background: rgba(255,255,255,0.04);
+            border-bottom: 1px solid var(--border);
+            padding: 0.75rem 1.25rem;
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+        .mockup-dot { width: 10px; height: 10px; border-radius: 50%; }
+        .mockup-dot:nth-child(1) { background: #ef4444; }
+        .mockup-dot:nth-child(2) { background: #f59e0b; }
+        .mockup-dot:nth-child(3) { background: #22c55e; }
+        .mockup-url {
+            flex: 1; background: rgba(255,255,255,0.05); border-radius: 6px;
+            padding: 0.25rem 0.75rem; font-size: 0.72rem; color: var(--text-dim);
+            text-align: center; margin: 0 0.75rem;
+        }
+        .mockup-body { padding: 1.5rem; }
+        .mockup-event-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem;
+        }
+        .mockup-event-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            border-radius: 12px; overflow: hidden;
+        }
+        .mockup-event-img {
+            height: 80px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2rem;
+        }
+        .mockup-event-img.c1 { background: linear-gradient(135deg, rgba(124,58,237,0.4), rgba(59,130,246,0.3)); }
+        .mockup-event-img.c2 { background: linear-gradient(135deg, rgba(245,158,11,0.3), rgba(239,68,68,0.3)); }
+        .mockup-event-img.c3 { background: linear-gradient(135deg, rgba(16,185,129,0.3), rgba(59,130,246,0.3)); }
+        .mockup-event-info { padding: 0.625rem; }
+        .mockup-event-name { font-size: 0.7rem; font-weight: 700; color: var(--text); margin-bottom: 0.2rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .mockup-event-meta { font-size: 0.62rem; color: var(--text-dim); }
+        .mockup-event-price {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0.375rem 0.625rem;
+            border-top: 1px solid var(--border);
+            font-size: 0.65rem;
+        }
+        .mockup-event-price strong { color: var(--amber); font-weight: 700; }
+        .mockup-event-price span { color: var(--primary-light); font-weight: 600; cursor: pointer; }
+
+        /* ── Features ── */
+        .features { padding: 7rem 1.5rem; }
+        .section-label {
+            font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+            color: var(--primary-light); margin-bottom: 1rem;
+        }
+        .section-title {
+            font-size: clamp(1.75rem, 4vw, 2.75rem);
+            font-weight: 800; letter-spacing: -0.03em;
+            line-height: 1.15; margin-bottom: 1rem;
+        }
+        .section-subtitle {
+            font-size: 1rem; color: var(--text-muted); line-height: 1.7;
+            max-width: 480px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.25rem;
+            margin-top: 3.5rem;
+        }
+        .feature-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.75rem;
+            transition: all 0.2s ease;
+        }
+        .feature-card:hover {
+            border-color: rgba(124,58,237,0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 16px 48px rgba(0,0,0,0.3);
+        }
+        .feature-icon {
+            width: 44px; height: 44px; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; margin-bottom: 1.25rem;
+        }
+        .feature-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .feature-desc { font-size: 0.875rem; color: var(--text-muted); line-height: 1.65; }
+
+        /* ── How it works ── */
+        .how-it-works { padding: 7rem 1.5rem; }
+        .steps-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 2rem; margin-top: 3.5rem; position: relative;
+        }
+        .step {
+            text-align: center;
+        }
+        .step-num {
+            width: 52px; height: 52px; border-radius: 50%;
+            background: var(--gradient);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; font-weight: 800; color: #fff;
+            margin: 0 auto 1.25rem;
+            box-shadow: 0 8px 24px var(--primary-glow);
+        }
+        .step-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .step-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.65; }
+
+        /* ── Roles split ── */
+        .roles { padding: 5rem 1.5rem; }
+        .roles-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+            margin-top: 3rem;
+        }
+        .role-card {
+            border-radius: 20px; padding: 2.5rem;
+            position: relative; overflow: hidden;
+        }
+        .role-card-org {
+            background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(59,130,246,0.1));
+            border: 1px solid rgba(124,58,237,0.2);
+        }
+        .role-card-ach {
+            background: linear-gradient(135deg, rgba(245,158,11,0.1), rgba(239,68,68,0.08));
+            border: 1px solid rgba(245,158,11,0.2);
+        }
+        .role-emoji { font-size: 2.5rem; margin-bottom: 1rem; display: block; }
+        .role-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem; }
+        .role-subtitle { font-size: 0.875rem; color: var(--text-muted); margin-bottom: 1.5rem; line-height: 1.6; }
+        .role-list { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 2rem; }
+        .role-list li {
+            display: flex; align-items: center; gap: 0.625rem;
+            font-size: 0.875rem; color: var(--text-muted);
+        }
+        .role-list li i { font-size: 0.9rem; flex-shrink: 0; }
+        .role-list-org li i { color: var(--primary-light); }
+        .role-list-ach li i { color: var(--amber); }
+        .btn-role-org {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            font-size: 0.9rem; font-weight: 700; color: #fff;
+            padding: 0.7rem 1.5rem; border-radius: 10px;
+            background: var(--gradient); text-decoration: none;
+            transition: opacity 0.15s, transform 0.15s;
+            box-shadow: 0 6px 20px var(--primary-glow);
+        }
+        .btn-role-org:hover { opacity: 0.85; transform: translateY(-1px); color: #fff; }
+        .btn-role-ach {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            font-size: 0.9rem; font-weight: 700; color: #1a1a0e;
+            padding: 0.7rem 1.5rem; border-radius: 10px;
+            background: linear-gradient(135deg, var(--amber), #d97706); text-decoration: none;
+            transition: opacity 0.15s, transform 0.15s;
+            box-shadow: 0 6px 20px rgba(245,158,11,0.3);
+        }
+        .btn-role-ach:hover { opacity: 0.85; transform: translateY(-1px); color: #1a1a0e; }
+
+        /* ── Upcoming events ── */
+        .upcoming { padding: 7rem 1.5rem; }
+        .events-public-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.25rem;
+            margin-top: 3rem;
+        }
+        .pub-event-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.2s ease;
+            display: flex; flex-direction: column;
+        }
+        .pub-event-card:hover {
+            border-color: rgba(124,58,237,0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+        }
+        .pub-event-cover {
+            height: 160px;
+            background: linear-gradient(135deg, rgba(124,58,237,0.3), rgba(59,130,246,0.25));
+            overflow: hidden; position: relative;
+        }
+        .pub-event-cover img { width:100%; height:100%; object-fit:cover; opacity:0.85; }
+        .pub-event-cover-placeholder {
+            width:100%; height:100%;
+            display:flex; align-items:center; justify-content:center;
+            font-size: 3rem;
+        }
+        .pub-event-cover-overlay {
+            position:absolute; inset:0;
+            background: linear-gradient(to bottom, transparent 40%, rgba(6,6,15,0.7));
+        }
+        .pub-event-body { padding: 1.25rem; flex:1; display:flex; flex-direction:column; }
+        .pub-event-title {
+            font-size: 0.95rem; font-weight: 700; color: var(--text);
+            margin-bottom: 0.625rem; letter-spacing: -0.02em;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .pub-event-meta { display:flex; flex-direction:column; gap:0.3rem; margin-bottom:1rem; }
+        .pub-event-meta-item {
+            display:flex; align-items:center; gap:0.5rem;
+            font-size: 0.8rem; color: var(--text-muted);
+        }
+        .pub-event-meta-item i { color:var(--text-dim); font-size:0.75rem; }
+        .pub-event-footer {
+            margin-top: auto;
+            display:flex; align-items:center; justify-content:space-between;
+            padding-top: 0.875rem;
+            border-top: 1px solid var(--border);
+        }
+        .pub-event-price {
+            font-size: 1.1rem; font-weight: 800;
+            color: var(--amber); letter-spacing: -0.03em;
+        }
+        .pub-event-price small { font-size: 0.7rem; font-weight: 500; color: var(--text-dim); }
+        .pub-event-cta {
+            font-size: 0.8rem; font-weight: 700;
+            color: var(--primary-light); text-decoration: none;
+            background: rgba(124,58,237,0.1);
+            border: 1px solid rgba(124,58,237,0.2);
+            padding: 0.35rem 0.875rem; border-radius: 8px;
+            transition: all 0.15s;
+        }
+        .pub-event-cta:hover { background: rgba(124,58,237,0.2); color: var(--primary-light); }
+        .pub-event-date-badge {
+            position:absolute; bottom:0.75rem; left:0.75rem;
+            background: rgba(0,0,0,0.55);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 0.3rem 0.625rem;
+            font-size: 0.72rem; font-weight: 700; color: var(--text);
+            display:flex; align-items:center; gap:0.35rem;
+        }
+        .pub-event-date-badge i { color: var(--primary-light); }
+        .empty-events {
+            grid-column: 1 / -1;
+            text-align: center; padding: 4rem 2rem;
+            background: rgba(255,255,255,0.02);
+            border: 1px dashed var(--border);
+            border-radius: 16px;
+            color: var(--text-muted); font-size: 0.9rem;
+        }
+        .empty-events i { font-size: 2.5rem; color: var(--text-dim); display:block; margin-bottom:0.75rem; }
+
+        /* ── CTA banner ── */
+        .cta-section { padding: 7rem 1.5rem; }
+        .cta-card {
+            max-width: 780px; margin: 0 auto; text-align: center;
+            background: linear-gradient(135deg, rgba(124,58,237,0.12), rgba(59,130,246,0.08));
+            border: 1px solid rgba(124,58,237,0.2);
+            border-radius: 24px; padding: 4rem 2rem;
+            position: relative; overflow: hidden;
+        }
+        .cta-card::before {
+            content: '';
+            position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+            width: 60%; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary-light), transparent);
+        }
+        .cta-title { font-size: clamp(1.75rem, 4vw, 2.5rem); font-weight: 800; letter-spacing: -0.03em; margin-bottom: 1rem; }
+        .cta-subtitle { font-size: 1rem; color: var(--text-muted); margin-bottom: 2.5rem; line-height: 1.7; }
+        .cta-actions { display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+
+        /* ── Footer ── */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 2.5rem 2rem;
+            display: flex; align-items: center; justify-content: space-between;
+            flex-wrap: wrap; gap: 1rem;
+        }
+        footer p { font-size: 0.82rem; color: var(--text-dim); }
+        footer a { color: var(--text-dim); text-decoration: none; font-size: 0.82rem; transition: color 0.15s; }
+        footer a:hover { color: var(--text-muted); }
+        .footer-links { display: flex; gap: 1.5rem; }
+
+        /* ── Animations ── */
+        .fade-up {
+            opacity: 0; transform: translateY(28px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+        .fade-up.visible { opacity: 1; transform: translateY(0); }
+        .delay-1 { transition-delay: 0.08s; }
+        .delay-2 { transition-delay: 0.16s; }
+        .delay-3 { transition-delay: 0.24s; }
+        .delay-4 { transition-delay: 0.32s; }
+        .delay-5 { transition-delay: 0.40s; }
+        .delay-6 { transition-delay: 0.48s; }
+
+        /* ── Divider ── */
+        .divider {
+            max-width: 1100px; margin: 0 auto;
+            height: 1px; background: var(--border);
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            nav { padding: 0.875rem 1.25rem; }
+            .nav-links { display: none; }
+            .roles-grid { grid-template-columns: 1fr; }
+            .mockup-event-grid { grid-template-columns: 1fr 1fr; }
+            .hero-stat-divider { display: none; }
+        }
+        @media (max-width: 480px) {
+            .mockup-event-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Ambient blobs -->
+<div class="ambient">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+</div>
+
+<!-- Navbar -->
+<nav>
+    <a href="{{ path('app_home') }}" class="nav-logo">
+        <div class="logo-icon">🎟</div>
+        <span class="logo-text">Easy<span>Organis</span></span>
+    </a>
+    <ul class="nav-links">
+        <li><a href="#features">Fonctionnalités</a></li>
+        <li><a href="#evenements">Événements</a></li>
+        <li><a href="#how">Comment ça marche</a></li>
+        <li><a href="#roles">Pour qui ?</a></li>
+    </ul>
+    <div class="nav-cta">
+        <a href="{{ path('app_login') }}" class="btn-ghost">Se connecter</a>
+        <a href="{{ path('app_register') }}" class="btn-primary-land">Commencer</a>
+    </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+    <div class="hero-badge fade-up">
+        <i class="bi bi-stars"></i> La billetterie réinventée
+    </div>
+    <h1 class="hero-title fade-up delay-1">
+        Créez & Vendez vos billets<br>
+        <span class="gradient-text">sans effort</span>
+    </h1>
+    <p class="hero-subtitle fade-up delay-2">
+        EasyOrganis connecte les organisateurs et les acheteurs autour d'une plateforme fluide, rapide et élégante.
+    </p>
+    <div class="hero-actions fade-up delay-3">
+        <a href="{{ path('app_register') }}" class="btn-hero-primary">
+            <i class="bi bi-rocket-takeoff"></i> Créer mon compte
+        </a>
+        <a href="#how" class="btn-hero-secondary">
+            <i class="bi bi-play-circle"></i> Voir comment ça marche
+        </a>
+    </div>
+    <div class="hero-stats fade-up delay-4">
+        <div class="hero-stat">
+            <div class="hero-stat-value">500+</div>
+            <div class="hero-stat-label">Événements créés</div>
+        </div>
+        <div class="hero-stat-divider"></div>
+        <div class="hero-stat">
+            <div class="hero-stat-value">12k+</div>
+            <div class="hero-stat-label">Billets vendus</div>
+        </div>
+        <div class="hero-stat-divider"></div>
+        <div class="hero-stat">
+            <div class="hero-stat-value">98%</div>
+            <div class="hero-stat-label">Satisfaction</div>
+        </div>
+        <div class="hero-stat-divider"></div>
+        <div class="hero-stat">
+            <div class="hero-stat-value">24/7</div>
+            <div class="hero-stat-label">Disponibilité</div>
+        </div>
+    </div>
+
+    <!-- Mockup -->
+    <div class="hero-visual fade-up delay-5">
+        <div class="mockup-frame">
+            <div class="mockup-bar">
+                <div class="mockup-dot"></div>
+                <div class="mockup-dot"></div>
+                <div class="mockup-dot"></div>
+                <div class="mockup-url">easyorganis.fr/acheteur</div>
+            </div>
+            <div class="mockup-body">
+                <div class="mockup-event-grid">
+                    <div class="mockup-event-card">
+                        <div class="mockup-event-img c1">🎵</div>
+                        <div class="mockup-event-info">
+                            <div class="mockup-event-name">Festival Jazz 2025</div>
+                            <div class="mockup-event-meta"><i class="bi bi-calendar3"></i> 12 Août · Paris</div>
+                        </div>
+                        <div class="mockup-event-price"><strong>35 €</strong><span>Acheter →</span></div>
+                    </div>
+                    <div class="mockup-event-card">
+                        <div class="mockup-event-img c2">🎭</div>
+                        <div class="mockup-event-info">
+                            <div class="mockup-event-name">Théâtre des Arts</div>
+                            <div class="mockup-event-meta"><i class="bi bi-calendar3"></i> 20 Sept · Lyon</div>
+                        </div>
+                        <div class="mockup-event-price"><strong>22 €</strong><span>Acheter →</span></div>
+                    </div>
+                    <div class="mockup-event-card">
+                        <div class="mockup-event-img c3">🏃</div>
+                        <div class="mockup-event-info">
+                            <div class="mockup-event-name">Trail des Vosges</div>
+                            <div class="mockup-event-meta"><i class="bi bi-calendar3"></i> 5 Oct · Strasbourg</div>
+                        </div>
+                        <div class="mockup-event-price"><strong>18 €</strong><span>Acheter →</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Features -->
+<section class="features" id="features">
+    <div style="max-width:1100px;margin:0 auto;">
+        <div class="fade-up">
+            <div class="section-label">Fonctionnalités</div>
+            <h2 class="section-title">Tout ce dont vous avez besoin,<br>rien de superflu</h2>
+            <p class="section-subtitle">Une plateforme conçue pour simplifier la création d'événements et l'achat de billets.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card fade-up delay-1">
+                <div class="feature-icon" style="background:rgba(124,58,237,0.15);color:var(--primary-light);">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                </div>
+                <div class="feature-title">Création rapide</div>
+                <div class="feature-desc">Publiez un événement en moins de 2 minutes. Formulaire intuitif, image de couverture, prix et jauge de places.</div>
+            </div>
+            <div class="feature-card fade-up delay-2">
+                <div class="feature-icon" style="background:rgba(59,130,246,0.15);color:var(--blue-light);">
+                    <i class="bi bi-ticket-perforated-fill"></i>
+                </div>
+                <div class="feature-title">Billets sécurisés</div>
+                <div class="feature-desc">Chaque billet génère un code unique vérifiable. Fini les fraudes, bonjour la sérénité à l'entrée.</div>
+            </div>
+            <div class="feature-card fade-up delay-3">
+                <div class="feature-icon" style="background:rgba(245,158,11,0.15);color:var(--amber);">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </div>
+                <div class="feature-title">Dashboard en temps réel</div>
+                <div class="feature-desc">Suivez vos ventes, revenus et acheteurs depuis votre espace organisateur. Stats instantanées.</div>
+            </div>
+            <div class="feature-card fade-up delay-4">
+                <div class="feature-icon" style="background:rgba(16,185,129,0.15);color:#34d399;">
+                    <i class="bi bi-funnel-fill"></i>
+                </div>
+                <div class="feature-title">Recherche & Filtres</div>
+                <div class="feature-desc">Les acheteurs trouvent l'événement parfait grâce aux filtres par catégorie, lieu et prix.</div>
+            </div>
+            <div class="feature-card fade-up delay-5">
+                <div class="feature-icon" style="background:rgba(239,68,68,0.12);color:#f87171;">
+                    <i class="bi bi-shield-lock-fill"></i>
+                </div>
+                <div class="feature-title">Rôles & Accès</div>
+                <div class="feature-desc">Espaces dédiés pour les organisateurs et les acheteurs. Chaque rôle accède uniquement à ce dont il a besoin.</div>
+            </div>
+            <div class="feature-card fade-up delay-6">
+                <div class="feature-icon" style="background:rgba(124,58,237,0.15);color:var(--primary-light);">
+                    <i class="bi bi-phone-fill"></i>
+                </div>
+                <div class="feature-title">100% Responsive</div>
+                <div class="feature-desc">Achetez ou gérez vos événements depuis n'importe quel appareil. Mobile, tablette, desktop.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- How it works -->
+<section class="how-it-works" id="how">
+    <div style="max-width:1100px;margin:0 auto;text-align:center;">
+        <div class="fade-up">
+            <div class="section-label">Comment ça marche</div>
+            <h2 class="section-title">Simple comme bonjour</h2>
+            <p class="section-subtitle" style="margin:0 auto;">Trois étapes suffisent, que vous soyez organisateur ou acheteur.</p>
+        </div>
+        <div class="steps-grid" style="max-width:900px;margin:3.5rem auto 0;">
+            <div class="step fade-up delay-1">
+                <div class="step-num">1</div>
+                <div class="step-title">Créez votre compte</div>
+                <div class="step-desc">Choisissez votre rôle — organisateur ou acheteur — et configurez votre profil en 30 secondes.</div>
+            </div>
+            <div class="step fade-up delay-2">
+                <div class="step-num">2</div>
+                <div class="step-title">Organisez ou explorez</div>
+                <div class="step-desc">Créez votre événement ou parcourez le catalogue. Tout est là, clair et rapide.</div>
+            </div>
+            <div class="step fade-up delay-3">
+                <div class="step-num">3</div>
+                <div class="step-title">Vendez & Profitez</div>
+                <div class="step-desc">Les billets se vendent, les acheteurs reçoivent leur code unique. Tout le monde est heureux.</div>
+            </div>
+            <div class="step fade-up delay-4">
+                <div class="step-num">4</div>
+                <div class="step-title">Suivez vos résultats</div>
+                <div class="step-desc">Consultez vos statistiques, revenus et historique depuis votre dashboard à tout moment.</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- Roles -->
+<section class="roles" id="roles">
+    <div style="max-width:1100px;margin:0 auto;">
+        <div class="fade-up" style="text-align:center;">
+            <div class="section-label">Pour qui ?</div>
+            <h2 class="section-title">Deux expériences, une plateforme</h2>
+        </div>
+        <div class="roles-grid" style="margin-top:3rem;">
+            <div class="role-card role-card-org fade-up delay-1">
+                <span class="role-emoji">🎪</span>
+                <div class="role-title">Organisateurs</div>
+                <div class="role-subtitle">Vous avez un événement à créer ? EasyOrganis vous donne tous les outils pour le publier, gérer les ventes et suivre vos résultats.</div>
+                <ul class="role-list role-list-org">
+                    <li><i class="bi bi-check-circle-fill"></i> Créez des événements illimités</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Dashboard avec stats en temps réel</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Visualisez la liste de vos acheteurs</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Modifiez ou supprimez à tout moment</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Gérez la jauge de places disponibles</li>
+                </ul>
+                <a href="{{ path('app_register') }}" class="btn-role-org">
+                    <i class="bi bi-rocket-takeoff"></i> Commencer à organiser
+                </a>
+            </div>
+            <div class="role-card role-card-ach fade-up delay-2">
+                <span class="role-emoji">🎫</span>
+                <div class="role-title">Acheteurs</div>
+                <div class="role-subtitle">Envie de vivre des expériences uniques ? Découvrez des centaines d'événements près de chez vous et achetez vos billets en un clic.</div>
+                <ul class="role-list role-list-ach">
+                    <li><i class="bi bi-check-circle-fill"></i> Parcourez le catalogue d'événements</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Filtrez par catégorie, lieu ou prix</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Achetez en un seul clic</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Recevez un code billet unique</li>
+                    <li><i class="bi bi-check-circle-fill"></i> Consultez votre historique de commandes</li>
+                </ul>
+                <a href="{{ path('app_register') }}" class="btn-role-ach">
+                    <i class="bi bi-search"></i> Explorer les événements
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Upcoming events -->
+<section class="upcoming" id="evenements">
+    <div style="max-width:1100px;margin:0 auto;">
+        <div class="fade-up" style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+            <div>
+                <div class="section-label">Événements à venir</div>
+                <h2 class="section-title">Ce qui se passe bientôt</h2>
+                <p class="section-subtitle">Découvrez les prochains événements disponibles sur EasyOrganis.</p>
+            </div>
+            <a href="{{ path('app_register') }}" style="font-size:0.85rem;font-weight:600;color:var(--primary-light);text-decoration:none;display:flex;align-items:center;gap:0.4rem;white-space:nowrap;">
+                Voir tout <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+
+        <div class="events-public-grid">
+            {% if prochains is empty %}
+            <div class="empty-events fade-up">
+                <i class="bi bi-calendar-x"></i>
+                Aucun événement à venir pour le moment.<br>
+                <a href="{{ path('app_register') }}" style="color:var(--primary-light);text-decoration:none;font-weight:600;">Soyez le premier à en créer un →</a>
+            </div>
+            {% else %}
+            {% for evenement in prochains %}
+            <div class="pub-event-card fade-up" style="animation-delay:{{ loop.index * 0.07 }}s;">
+                <div class="pub-event-cover">
+                    {% if evenement.image %}
+                    <img src="{{ asset('uploads/' ~ evenement.image) }}" alt="{{ evenement.nom }}">
+                    {% else %}
+                    <div class="pub-event-cover-placeholder">🎟</div>
+                    {% endif %}
+                    <div class="pub-event-cover-overlay"></div>
+                    <div class="pub-event-date-badge">
+                        <i class="bi bi-calendar3"></i>
+                        {{ evenement.date|date('d M Y') }}
+                    </div>
+                </div>
+                <div class="pub-event-body">
+                    <div class="pub-event-title">{{ evenement.nom }}</div>
+                    <div class="pub-event-meta">
+                        <div class="pub-event-meta-item">
+                            <i class="bi bi-geo-alt"></i> {{ evenement.lieu }}
+                        </div>
+                        <div class="pub-event-meta-item">
+                            <i class="bi bi-people"></i> {{ evenement.nombresPlaces }} places
+                        </div>
+                    </div>
+                    <div class="pub-event-footer">
+                        <div class="pub-event-price">
+                            {{ evenement.prixTicket|number_format(0, '.', '') }} €
+                            <small> / billet</small>
+                        </div>
+                        <a href="{{ path('app_login') }}" class="pub-event-cta">
+                            <i class="bi bi-ticket-perforated"></i> Acheter
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- CTA -->
+<section class="cta-section">
+    <div class="cta-card fade-up">
+        <h2 class="cta-title">Prêt à vous lancer ?</h2>
+        <p class="cta-subtitle">Rejoignez des centaines d'organisateurs et d'acheteurs qui font confiance à EasyOrganis chaque jour.</p>
+        <div class="cta-actions">
+            <a href="{{ path('app_register') }}" class="btn-hero-primary">
+                <i class="bi bi-person-plus-fill"></i> Créer un compte gratuit
+            </a>
+            <a href="{{ path('app_login') }}" class="btn-hero-secondary">
+                <i class="bi bi-box-arrow-in-right"></i> Se connecter
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer>
+    <div style="display:flex;align-items:center;gap:0.625rem;">
+        <div style="width:28px;height:28px;background:var(--gradient);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.85rem;">🎟</div>
+        <span style="font-size:0.875rem;font-weight:700;color:var(--text);">EasyOrganis</span>
+    </div>
+    <p style="color:var(--text-dim);font-size:0.8rem;">© 2025 EasyOrganis. Tous droits réservés.</p>
+    <div class="footer-links">
+        <a href="{{ path('app_login') }}">Connexion</a>
+        <a href="{{ path('app_register') }}">Inscription</a>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Intersection Observer for fade-up animations
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+    // Trigger hero elements immediately
+    document.querySelectorAll('.hero .fade-up').forEach(el => {
+        setTimeout(() => el.classList.add('visible'), 100);
+    });
+</script>
+</body>
+</html>

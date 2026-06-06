@@ -1,0 +1,285 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ evenement.nom }} — Détails{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .detail-layout { max-width: 1100px; margin: 0 auto; padding: 0 1.5rem; }
+
+    .detail-hero {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+        display: grid;
+        grid-template-columns: 340px 1fr;
+    }
+    .hero-image {
+        position: relative;
+        min-height: 280px;
+        background: linear-gradient(135deg, rgba(124,58,237,0.4), rgba(59,130,246,0.4));
+        overflow: hidden;
+    }
+    .hero-image img { width: 100%; height: 100%; object-fit: cover; opacity: 0.85; }
+    .hero-image-placeholder {
+        width: 100%; height: 100%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 5rem;
+    }
+    .hero-info { padding: 2rem; }
+
+    .hero-cat {
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        font-size: 0.72rem; font-weight: 600;
+        letter-spacing: 0.05em; text-transform: uppercase;
+        color: var(--primary-light);
+        background: rgba(124,58,237,0.12);
+        border: 1px solid rgba(124,58,237,0.25);
+        padding: 0.2rem 0.75rem; border-radius: 999px;
+        margin-bottom: 0.875rem;
+    }
+    .hero-title {
+        font-size: 1.75rem; font-weight: 800;
+        letter-spacing: -0.03em; color: var(--text);
+        line-height: 1.2; margin-bottom: 1rem;
+    }
+    .hero-meta { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.5rem; }
+    .hero-meta-item { display: flex; align-items: center; gap: 0.625rem; font-size: 0.875rem; color: var(--text-muted); }
+    .hero-meta-item i { color: var(--primary-light); font-size: 0.9rem; width: 16px; }
+
+    .hero-actions { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
+    /* Stats row */
+    .detail-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+
+    .donut-wrap {
+        display: flex; align-items: center; gap: 1rem;
+        margin-top: 0.75rem;
+    }
+    .donut-svg { flex-shrink: 0; }
+    .donut-legend { font-size: 0.78rem; }
+    .donut-legend-item { display: flex; align-items: center; gap: 0.375rem; margin-bottom: 0.25rem; }
+    .donut-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    /* Buyers table */
+    .buyers-section {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    .buyers-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+        display: flex; align-items: center; justify-content: space-between;
+    }
+    .buyers-header h2 { font-size: 1rem; font-weight: 700; color: var(--text); margin: 0; }
+    .buyers-header span { font-size: 0.8rem; color: var(--text-muted); }
+
+    .buyer-row { display: flex; align-items: center; padding: 1rem 1.5rem; gap: 1rem; border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.15s; }
+    .buyer-row:hover { background: rgba(255,255,255,0.025); }
+    .buyer-row:last-child { border-bottom: none; }
+    .buyer-avatar {
+        width: 36px; height: 36px; border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), var(--blue));
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.8rem; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+    .buyer-info { flex: 1; }
+    .buyer-name { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+    .buyer-email { font-size: 0.78rem; color: var(--text-muted); }
+    .ticket-code {
+        font-family: 'Courier New', monospace;
+        font-size: 0.75rem; font-weight: 700;
+        color: var(--primary-light);
+        background: rgba(124,58,237,0.1);
+        border: 1px solid rgba(124,58,237,0.2);
+        padding: 0.2rem 0.6rem; border-radius: 6px;
+        letter-spacing: 0.05em;
+    }
+    .ticket-date { font-size: 0.75rem; color: var(--text-dim); text-align: right; min-width: 80px; }
+
+    .empty-buyers {
+        text-align: center; padding: 3rem;
+        font-size: 0.875rem; color: var(--text-muted);
+    }
+    .empty-buyers i { font-size: 2.5rem; color: var(--text-dim); display: block; margin-bottom: 0.75rem; }
+
+    @media (max-width: 768px) {
+        .detail-hero { grid-template-columns: 1fr; }
+        .hero-image { min-height: 200px; }
+        .detail-stats { grid-template-columns: 1fr 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+{#
+    Variables Twig attendues :
+    - evenement : Evenement
+    - tickets : collection de Tickets avec user
+    - tickets_vendus : int
+    - tickets_restants : int
+    - revenus : float
+#}
+<div class="detail-layout animate-fade-up">
+
+    {# Breadcrumb #}
+    <div style="margin-bottom:1.25rem;font-size:0.82rem;color:var(--text-dim);display:flex;align-items:center;gap:0.5rem;">
+        <a href="{{ path('app_organisateur_evenements') }}" style="color:var(--text-muted);text-decoration:none;" class="d-inline-flex align-items-center gap-1">
+            <i class="bi bi-grid-3x3-gap"></i> Mes événements
+        </a>
+        <i class="bi bi-chevron-right" style="font-size:0.65rem;"></i>
+        <span style="color:var(--text);">{{ evenement.nom }}</span>
+    </div>
+
+    {# Hero #}
+    <div class="detail-hero animate-fade-up delay-1">
+        <div class="hero-image">
+            {% if evenement.image %}
+            <img src="{{ asset('uploads/' ~ evenement.image) }}" alt="{{ evenement.nom }}">
+            {% else %}
+            <div class="hero-image-placeholder">🎟</div>
+            {% endif %}
+        </div>
+        <div class="hero-info">
+            <div style="display:flex;align-items:center;gap:0.625rem;margin-bottom:0.875rem;flex-wrap:wrap;">
+                <span class="hero-cat" style="margin-bottom:0;">
+                    <i class="bi bi-tag"></i>
+                    {{ evenement.categorie.nomCategorie ?? 'Autre' }}
+                </span>
+                {% if evenement.isPublished %}
+                    <span style="display:inline-flex;align-items:center;gap:0.35rem;font-size:0.72rem;font-weight:700;padding:0.2rem 0.7rem;border-radius:999px;background:rgba(16,185,129,0.12);color:#34d399;border:1px solid rgba(16,185,129,0.25);">
+                        <i class="bi bi-check-circle-fill"></i> Publié
+                    </span>
+                {% else %}
+                    <span style="display:inline-flex;align-items:center;gap:0.35rem;font-size:0.72rem;font-weight:700;padding:0.2rem 0.7rem;border-radius:999px;background:rgba(245,158,11,0.1);color:#f59e0b;border:1px solid rgba(245,158,11,0.25);">
+                        <i class="bi bi-pencil-fill"></i> Brouillon
+                    </span>
+                {% endif %}
+            </div>
+            <h1 class="hero-title">{{ evenement.nom }}</h1>
+            <div class="hero-meta">
+                <div class="hero-meta-item">
+                    <i class="bi bi-calendar3"></i>
+                    {{ evenement.date|date('D d M Y à H:i') }}
+                </div>
+                <div class="hero-meta-item">
+                    <i class="bi bi-geo-alt-fill"></i>
+                    {{ evenement.lieu }}
+                </div>
+                <div class="hero-meta-item">
+                    <i class="bi bi-currency-euro"></i>
+                    {{ evenement.prixTicket ?? '0' }} € par billet
+                </div>
+                <div class="hero-meta-item">
+                    <i class="bi bi-people-fill"></i>
+                    {{ evenement.nombresPlaces ?? 0 }} places au total
+                </div>
+            </div>
+            <div class="hero-actions">
+                <a href="{{ path('app_organisateur_modifier', {id: evenement.id}) }}" class="btn-secondary-eo" style="font-size:0.85rem;padding:0.5rem 1rem;">
+                    <i class="bi bi-pencil"></i> Modifier
+                </a>
+                <a href="{{ path('app_tickets_variation', {id: evenement.id}) }}" class="btn-secondary-eo" style="font-size:0.85rem;padding:0.5rem 1rem;">
+                    <i class="bi bi-layers-fill"></i> Variations de billets
+                </a>
+                {% if not evenement.isPublished %}
+                <a href="{{ path('app_organisateur_publier', {id: evenement.id}) }}"
+                   onclick="return confirm('Publier cet événement ? Il sera visible par tous les acheteurs.')"
+                   style="font-size:0.85rem;padding:0.5rem 1rem;display:inline-flex;align-items:center;gap:0.4rem;font-weight:700;color:#34d399;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);border-radius:10px;text-decoration:none;transition:all 0.15s;">
+                    <i class="bi bi-send-fill"></i> Publier l'événement
+                </a>
+                {% endif %}
+                <a href="{{ path('app_organisateur_evenements') }}" class="btn-secondary-eo" style="font-size:0.85rem;padding:0.5rem 1rem;">
+                    <i class="bi bi-arrow-left"></i> Retour
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {# Stats #}
+    {% set total = evenement.nombresPlaces ?? 0 %}
+    {% set vendus = tickets_vendus ?? 0 %}
+    {% set restants = tickets_restants ?? (total - vendus) %}
+    {% set pct = total > 0 ? (vendus / total * 100)|round : 0 %}
+
+    <div class="detail-stats animate-fade-up delay-2">
+        <div class="stat-card">
+            <div class="stat-icon" style="background:rgba(59,130,246,0.15);color:#60a5fa;">
+                <i class="bi bi-ticket-perforated-fill"></i>
+            </div>
+            <div class="stat-value">{{ vendus }}</div>
+            <div class="stat-label">Tickets vendus</div>
+            <div style="margin-top:0.625rem;height:4px;background:rgba(255,255,255,0.08);border-radius:999px;overflow:hidden;">
+                <div style="width:{{ pct }}%;height:100%;background:linear-gradient(90deg,var(--primary),var(--blue));border-radius:999px;"></div>
+            </div>
+            <div style="font-size:0.72rem;color:var(--text-dim);margin-top:0.3rem;">{{ pct }}% rempli</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon" style="background:rgba(16,185,129,0.15);color:#34d399;">
+                <i class="bi bi-people"></i>
+            </div>
+            <div class="stat-value">{{ restants }}</div>
+            <div class="stat-label">Places restantes</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon" style="background:rgba(245,158,11,0.15);color:var(--amber);">
+                <i class="bi bi-cash-stack"></i>
+            </div>
+            <div class="stat-value">
+                {% if revenus is defined %}
+                    {{ revenus|number_format(2, '.', ' ') }} €
+                {% else %}
+                    {{ (vendus * (evenement.prixTicket ?? 0))|number_format(2, '.', ' ') }} €
+                {% endif %}
+            </div>
+            <div class="stat-label">Revenus générés</div>
+        </div>
+    </div>
+
+    {# Description #}
+    {% if evenement.description %}
+    <div class="glass-card animate-fade-up delay-3" style="padding:1.5rem;margin-bottom:1.5rem;">
+        <h3 style="font-size:0.875rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.75rem;">Description</h3>
+        <p style="font-size:0.9rem;color:var(--text-muted);line-height:1.7;margin:0;">{{ evenement.description }}</p>
+    </div>
+    {% endif %}
+
+    {# Buyers list #}
+    <div class="buyers-section animate-fade-up delay-4">
+        <div class="buyers-header">
+            <h2><i class="bi bi-person-lines-fill me-2" style="color:var(--primary-light);"></i>Acheteurs</h2>
+            <span>{{ vendus }} billet{{ vendus > 1 ? 's' : '' }} vendus</span>
+        </div>
+
+        {% if tickets is empty %}
+        <div class="empty-buyers">
+            <i class="bi bi-inbox"></i>
+            Aucun billet vendu pour l'instant.
+        </div>
+        {% else %}
+        {% for ticket in tickets %}
+        <div class="buyer-row">
+            <div class="buyer-avatar">
+                {{ ticket.user.nom|slice(0,1)|upper }}
+            </div>
+            <div class="buyer-info">
+                <div class="buyer-name">{{ ticket.user.nom }} {{ ticket.user.prenom }}</div>
+                <div class="buyer-email">{{ ticket.user.email }}</div>
+            </div>
+            <span class="ticket-code">{{ ticket.codeUnique }}</span>
+            <span class="status-badge {{ ticket.statut == 'actif' ? 'active' : (ticket.statut == 'utilisé' ? 'used' : 'canceled') }}">
+                {{ ticket.statut|capitalize }}
+            </span>
+            <div class="ticket-date">{{ ticket.dateAchat|date('d/m/Y') }}</div>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

@@ -11,4 +11,6 @@ RUN apt-get update && apt-get install -y libpq-dev \
 
 RUN composer install --no-dev --optimize-autoloader --no-scripts
 
-CMD ["frankenphp", "run", "--config", "/app/Caddyfile"]
+EXPOSE 80
+
+ENTRYPOINT ["frankenphp", "run", "--config", "/app/Caddyfile"]

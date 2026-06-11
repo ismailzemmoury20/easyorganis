@@ -6,12 +6,10 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 COPY . .
 
-RUN apt-get update && apt-get install -y libpq-dev \
+RUN apt-get update && apt-get install -y libpq-dev unzip \
     && docker-php-ext-install pdo pdo_mysql
 
-RUN composer install --no-dev --optimize-autoloader --no-scripts
-
-RUN APP_ENV=prod php bin/console cache:warmup
+RUN COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader --no-scripts
 
 EXPOSE 80
 

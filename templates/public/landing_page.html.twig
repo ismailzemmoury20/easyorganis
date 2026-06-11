@@ -1,0 +1,353 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ evenement.nom }}{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .lp-layout { max-width: 980px; margin: 0 auto; padding: 0 1.5rem; }
+
+    /* ── Hero ── */
+    .lp-hero {
+        border-radius: 20px;
+        overflow: hidden;
+        position: relative;
+        height: 380px;
+        background: linear-gradient(135deg, rgba(124,58,237,0.4), rgba(59,130,246,0.3));
+        margin-bottom: 2rem;
+    }
+    .lp-hero img {
+        width: 100%; height: 100%;
+        object-fit: cover; opacity: 0.75;
+    }
+    .lp-hero-placeholder {
+        width: 100%; height: 100%;
+        display: flex; align-items: center;
+        justify-content: center; font-size: 6rem;
+    }
+    .lp-hero-overlay {
+        position: absolute; inset: 0;
+        background: linear-gradient(to top, rgba(6,6,15,0.85) 0%, transparent 55%);
+    }
+    .lp-hero-content {
+        position: absolute; bottom: 0; left: 0; right: 0;
+        padding: 2rem 2.5rem;
+    }
+    .lp-cat {
+        display: inline-flex; align-items: center; gap: 0.4rem;
+        font-size: 0.72rem; font-weight: 600;
+        letter-spacing: 0.06em; text-transform: uppercase;
+        color: var(--primary-light);
+        background: rgba(124,58,237,0.18);
+        border: 1px solid rgba(124,58,237,0.3);
+        padding: 0.2rem 0.75rem; border-radius: 999px;
+        backdrop-filter: blur(8px);
+        margin-bottom: 0.75rem;
+    }
+    .lp-title {
+        font-size: 2.2rem; font-weight: 800;
+        letter-spacing: -0.03em; color: #fff;
+        line-height: 1.15; margin: 0;
+        text-shadow: 0 2px 12px rgba(0,0,0,0.4);
+    }
+
+    /* ── Body grid ── */
+    .lp-body {
+        display: grid;
+        grid-template-columns: 1fr 300px;
+        gap: 1.5rem;
+        align-items: start;
+    }
+
+    /* ── Info card ── */
+    .lp-info {
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    .lp-info-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border-subtle);
+    }
+    .lp-info-header h2 {
+        margin: 0; font-size: 1rem;
+        font-weight: 700; color: var(--text);
+    }
+    .lp-meta-list { padding: 1.25rem 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+    .lp-meta-item {
+        display: flex; align-items: flex-start; gap: 0.875rem;
+    }
+    .lp-meta-icon {
+        width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.9rem;
+    }
+    .lp-meta-label { font-size: 0.72rem; color: var(--text-dim); font-weight: 500; margin-bottom: 0.1rem; }
+    .lp-meta-value { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+
+    /* ── Description ── */
+    .lp-desc {
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-top: 1.5rem;
+    }
+    .lp-desc h3 {
+        font-size: 0.8rem; font-weight: 600;
+        text-transform: uppercase; letter-spacing: 0.06em;
+        color: var(--text-dim); margin-bottom: 0.875rem;
+    }
+    .lp-desc p {
+        font-size: 0.9rem; line-height: 1.75;
+        color: var(--text-muted); margin: 0;
+    }
+
+    /* ── Sidebar ── */
+    .lp-sidebar { display: flex; flex-direction: column; gap: 1rem; }
+
+    .lp-ticket-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: 16px;
+        padding: 1.5rem;
+        position: relative; overflow: hidden;
+    }
+    .lp-ticket-card::before {
+        content: ''; position: absolute;
+        top: 0; left: 0; right: 0; height: 3px;
+        background: linear-gradient(90deg, var(--primary), var(--blue));
+    }
+    .lp-ticket-price {
+        font-size: 2.4rem; font-weight: 800;
+        letter-spacing: -0.04em; color: var(--text);
+        line-height: 1;
+    }
+    .lp-ticket-price span {
+        font-size: 1.1rem; font-weight: 500;
+        color: var(--text-muted); vertical-align: super;
+    }
+    .lp-ticket-label {
+        font-size: 0.78rem; color: var(--text-dim);
+        margin-top: 0.25rem; margin-bottom: 1.25rem;
+    }
+    .lp-ticket-sep {
+        height: 1px; background: var(--border-subtle);
+        margin: 1.25rem 0;
+    }
+    .lp-ticket-info-row {
+        display: flex; justify-content: space-between;
+        font-size: 0.8rem; margin-bottom: 0.5rem;
+    }
+    .lp-ticket-info-row .lk { color: var(--text-dim); }
+    .lp-ticket-info-row .vk { color: var(--text-muted); font-weight: 600; }
+
+    /* ── Share card ── */
+    .lp-share-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: 16px;
+        padding: 1.25rem;
+    }
+    .lp-share-card h4 {
+        font-size: 0.8rem; font-weight: 600;
+        color: var(--text-dim); text-transform: uppercase;
+        letter-spacing: 0.05em; margin: 0 0 0.875rem;
+    }
+    .share-url-box {
+        display: flex; align-items: center;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid var(--border-subtle);
+        border-radius: 8px; overflow: hidden;
+    }
+    .share-url-text {
+        flex: 1; padding: 0.5rem 0.75rem;
+        font-size: 0.72rem; color: var(--text-dim);
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        font-family: 'Courier New', monospace;
+    }
+    .btn-copy {
+        flex-shrink: 0;
+        background: rgba(124,58,237,0.12);
+        border: none; border-left: 1px solid var(--border-subtle);
+        color: var(--primary-light);
+        padding: 0.5rem 0.75rem;
+        cursor: pointer; font-size: 0.85rem;
+        transition: all 0.15s ease;
+    }
+    .btn-copy:hover { background: rgba(124,58,237,0.22); }
+
+    #copy-toast {
+        position: fixed; bottom: 1.5rem; right: 1.5rem;
+        background: rgba(16,185,129,0.12);
+        border: 1px solid rgba(16,185,129,0.3);
+        color: #34d399;
+        padding: 0.625rem 1rem; border-radius: 10px;
+        font-size: 0.85rem; font-weight: 500;
+        display: flex; align-items: center; gap: 0.5rem;
+        opacity: 0; transition: opacity 0.25s ease;
+        pointer-events: none; z-index: 9999;
+    }
+    #copy-toast.show { opacity: 1; }
+
+    @media (max-width: 768px) {
+        .lp-body { grid-template-columns: 1fr; }
+        .lp-hero { height: 260px; }
+        .lp-title { font-size: 1.5rem; }
+        .lp-hero-content { padding: 1.25rem 1.5rem; }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="lp-layout animate-fade-up">
+
+    <!-- ── Hero ── -->
+    <div class="lp-hero">
+        {% if evenement.image %}
+            <img src="{{ asset('uploads/' ~ evenement.image) }}" alt="{{ evenement.nom }}">
+        {% else %}
+            <div class="lp-hero-placeholder">🎟</div>
+        {% endif %}
+        <div class="lp-hero-overlay"></div>
+        <div class="lp-hero-content">
+            {% if evenement.categorie %}
+                <div class="lp-cat">
+                    <i class="bi bi-tag"></i>
+                    {{ evenement.categorie.nomCategorie }}
+                </div>
+            {% endif %}
+            <h1 class="lp-title">{{ evenement.nom }}</h1>
+        </div>
+    </div>
+
+    <!-- ── Body ── -->
+    <div class="lp-body">
+
+        <!-- Colonne principale -->
+        <div>
+            <div class="lp-info animate-fade-up delay-1">
+                <div class="lp-info-header">
+                    <h2>Informations sur l'événement</h2>
+                </div>
+                <div class="lp-meta-list">
+                    <div class="lp-meta-item">
+                        <div class="lp-meta-icon" style="background:rgba(124,58,237,0.12);color:var(--primary-light);">
+                            <i class="bi bi-calendar3"></i>
+                        </div>
+                        <div>
+                            <div class="lp-meta-label">Date</div>
+                            <div class="lp-meta-value">{{ evenement.date|date('l d F Y à H:i') }}</div>
+                        </div>
+                    </div>
+                    <div class="lp-meta-item">
+                        <div class="lp-meta-icon" style="background:rgba(59,130,246,0.12);color:#60a5fa;">
+                            <i class="bi bi-geo-alt-fill"></i>
+                        </div>
+                        <div>
+                            <div class="lp-meta-label">Lieu</div>
+                            <div class="lp-meta-value">{{ evenement.lieu }}</div>
+                        </div>
+                    </div>
+                    <div class="lp-meta-item">
+                        <div class="lp-meta-icon" style="background:rgba(16,185,129,0.12);color:#34d399;">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                        <div>
+                            <div class="lp-meta-label">Capacité</div>
+                            <div class="lp-meta-value">{{ evenement.nombresPlaces }} places</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if evenement.description %}
+            <div class="lp-desc animate-fade-up delay-2">
+                <h3>À propos</h3>
+                <p>{{ evenement.description }}</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="lp-sidebar animate-fade-up delay-2">
+
+            <!-- Ticket card -->
+            <div class="lp-ticket-card">
+                <div class="lp-ticket-price">
+                    <span>€</span>{{ evenement.prixTicket|number_format(0, '.', '') }}
+                </div>
+                <div class="lp-ticket-label">par billet</div>
+
+                {% if is_granted('ROLE_ACHETEUR') %}
+                    <a href="{{ path('app_acheteur_acheter', {id: evenement.id}) }}"
+                       class="btn-primary-eo" style="width:100%;justify-content:center;">
+                        <i class="bi bi-ticket-perforated-fill"></i>
+                        Acheter un billet
+                    </a>
+                {% elseif app.user is null %}
+                    <a href="{{ path('app_login') }}"
+                       class="btn-primary-eo" style="width:100%;justify-content:center;">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                        Se connecter pour acheter
+                    </a>
+                {% else %}
+                    <div style="font-size:0.8rem;color:var(--text-dim);text-align:center;padding:0.5rem;">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Réservé aux acheteurs
+                    </div>
+                {% endif %}
+
+                <div class="lp-ticket-sep"></div>
+                <div class="lp-ticket-info-row">
+                    <span class="lk">Date</span>
+                    <span class="vk">{{ evenement.date|date('d/m/Y') }}</span>
+                </div>
+                <div class="lp-ticket-info-row">
+                    <span class="lk">Lieu</span>
+                    <span class="vk">{{ evenement.lieu }}</span>
+                </div>
+                <div class="lp-ticket-info-row">
+                    <span class="lk">Places</span>
+                    <span class="vk">{{ evenement.nombresPlaces }}</span>
+                </div>
+            </div>
+
+            <!-- Share card -->
+            <div class="lp-share-card">
+                <h4><i class="bi bi-share-fill me-1"></i> Partager</h4>
+                <div class="share-url-box">
+                    <span class="share-url-text" id="landing-url">{{ absolute_url(app.request.uri) }}</span>
+                    <button class="btn-copy" onclick="copyLandingUrl()" title="Copier le lien">
+                        <i class="bi bi-clipboard" id="copy-icon"></i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<!-- Toast notification -->
+<div id="copy-toast"><i class="bi bi-check-circle-fill"></i> Lien copié !</div>
+
+{% endblock %}
+
+{% block javascripts %}
+<script>
+function copyLandingUrl() {
+    const url = document.getElementById('landing-url').textContent.trim();
+    navigator.clipboard.writeText(url).then(() => {
+        const icon  = document.getElementById('copy-icon');
+        const toast = document.getElementById('copy-toast');
+        icon.className = 'bi bi-clipboard-check';
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+            icon.className = 'bi bi-clipboard';
+        }, 2200);
+    });
+}
+</script>
+{% endblock %}

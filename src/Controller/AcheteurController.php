@@ -13,9 +13,19 @@ use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Commandes;
 use App\Repository\CommandesRepository;
 use App\Repository\CategoriesRepository;
+use Endroid\QrCode\Builder\BuilderInterface;
+use Endroid\QrCodeBundle\Response\QrCodeResponse;
+use Nucleos\DompdfBundle\Wrapper\DompdfWrapperInterface;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Symfony\Component\Mime\Address;
 
 final class AcheteurController extends AbstractController
 {
+    public function __construct(private BuilderInterface $customQrCodeBuilder)
+    {
+    }
+
     #[Route('/acheteur', name: 'app_acheteur')]
     public function index(EvenementsRepository $evenementsRepository, CategoriesRepository $categoriesRepository, Request $request, PaginatorInterface $paginator): Response
     {
@@ -52,9 +62,13 @@ final class AcheteurController extends AbstractController
         ]);
     }
     #[Route('/acheteur/evenements/{id}/acheter', name: 'app_acheteur_acheter')]
-    public function acheterTicker(TicketsRepository $ticketsRepository, Request $request, int $id, EntityManagerInterface $em): Response
+    public function acheterTicker(MailerInterface $mailer, TicketsRepository $ticketsRepository, Request $request, int $id, EntityManagerInterface $em): Response
     {
-        
+        $user = $this->getUser();
+        if (!$user instanceof \App\Entity\User) {
+            throw $this->createAccessDeniedException();
+        }
+
         $ticket = $ticketsRepository->findTicketsByEvenement($id);
         if(empty($ticket)){
             $this->addFlash('error', 'Aucun ticket disponible pour cet événement.');
@@ -63,20 +77,63 @@ final class AcheteurController extends AbstractController
             $ticket->setStatut('vendu');
             $commande = new Commandes();
             $commande->setEvenementId($ticket->getEvenementId());
-            $commande->setUserId($this->getUser());
+            $commande->setUserId($user);
             $commande->setMontantTotal($ticket->getEvenementId()->getPrixTicket());
             $commande->setDateCommande(new \DateTime());
             $commande->setAchat(1);
             $commande->setStatut('payé');
             $em->persist($commande);
-            $ticket->setUserId($this->getUser());
+            $ticket->setUserId($user);
             $ticket->setDateAchat(new \DateTime());
             $em->flush();
             $this->addFlash('success', 'Ticket acheté avec succès !');
 
-            return $this->redirectToRoute('app_acheteur_evenements_details', ['id' => $id]);
+            $email = (new TemplatedEmail())
+                ->from(new Address('ismail.zamouri3@gmail.com', 'EasyOrganis'))
+                ->to($user->getEmail())
+                ->subject('Votre ticket — ' . $ticket->getEvenementId()->getNom())
+                ->htmlTemplate('acheteur/email_ticket.html.twig')
+                ->context([
+                    'ticket' => $ticket,
+                    'evenement' => $ticket->getEvenementId(),
+                ]);
+
+            $mailer->send($email);
+
+            return $this->redirectToRoute('app_acheteur_ticket_pdf', ['id' => $ticket->getId()]);
         }
     }
+    #[Route('/acheteur/evenements/{id}/qr', name: 'app_acheteur_code')]
+    public function ticketCodeQr(BuilderInterface $customQrCodeBuilder ,TicketsRepository $ticketsRepository, Request $request, int $id): Response
+    {
+        $ticket = $ticketsRepository->find($id);
+        if (!$ticket || $ticket->getUserId() !== $this->getUser()) {
+            throw $this->createNotFoundException('Ticket non trouvé');
+        }
+
+        $result = $customQrCodeBuilder->build(
+            data: $ticket->getCodeUnique(),
+            size: 300,
+            margin: 20
+        );
+
+        return new QrCodeResponse($result);
+    }
+
+    #[Route('/acheteur/ticket/{id}/pdf', name:'app_acheteur_ticket_pdf')]
+    public function generateTicketPdf(DompdfWrapperInterface $wrapper,TicketsRepository $ticketsRepository,int $id): Response
+    {
+        $ticket = $ticketsRepository->find($id);
+        if (!$ticket || $ticket->getUserId() !== $this->getUser()) {
+            throw $this->createNotFoundException('Ticket non trouvé');
+        }
+        $html = $this->renderView('/acheteur/ticket_pdf.html.twig', [
+            'ticket' => $ticket,
+            'evenement' => $ticket->getEvenementId(),
+        ]);
+        return $wrapper->getStreamResponse($html, 'ticket-' . $ticket->getCodeUnique() . '.pdf');
+    }
+
     #[Route('/acheteur/commandes', name: 'app_acheteur_commandes')]
     public function commandes(CommandesRepository $commandesRepository, TicketsRepository $ticketsRepository): Response
     {

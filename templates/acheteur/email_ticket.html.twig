@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Votre ticket — {{ evenement.nom }}</title>
+</head>
+<body style="margin:0; padding:0; background-color:#f0edf8; font-family:helvetica,arial,sans-serif;">
+
+    <table width="100%" cellpadding="0" cellspacing="0" border="0"
+           style="background-color:#f0edf8; padding:40px 16px;">
+        <tr>
+            <td align="center">
+
+                <!-- ══ Carte principale ══ -->
+                <table width="560" cellpadding="0" cellspacing="0" border="0"
+                       style="max-width:560px; background:#ffffff; border-radius:10px; overflow:hidden;
+                              box-shadow:0 2px 16px rgba(61,30,138,0.10);">
+
+                    <!-- En-tête violet -->
+                    <tr>
+                        <td style="background-color:#3d1e8a; padding:32px 40px 28px;">
+                            <p style="margin:0; font-size:11px; letter-spacing:2px;
+                                      text-transform:uppercase; color:#c4aff5;">
+                                Confirmation d'achat
+                            </p>
+                            <p style="margin:10px 0 0; font-size:28px; font-weight:bold;
+                                      color:#ffffff; line-height:1.2;">
+                                <span style="color:#a78bfa;">Easy</span>Organis
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Accroche -->
+                    <tr>
+                        <td style="padding:36px 40px 0;">
+                            <p style="margin:0 0 6px; font-size:20px; font-weight:bold; color:#1a1a2e;">
+                                Votre ticket est confirmé&nbsp;!
+                            </p>
+                            <p style="margin:0; font-size:14px; color:#4a4a6a; line-height:1.6;">
+                                Merci pour votre achat. Retrouvez ci-dessous le récapitulatif
+                                de votre billet ainsi que votre code unique d'entrée.
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Bloc événement -->
+                    <tr>
+                        <td style="padding:28px 40px 0;">
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0"
+                                   style="background:#f8f6ff; border-radius:8px;
+                                          border-left:4px solid #7c4dff;">
+                                <tr>
+                                    <td style="padding:20px 24px;">
+
+                                        <p style="margin:0 0 16px; font-size:16px; font-weight:bold;
+                                                  color:#3d1e8a;">
+                                            {{ evenement.nom }}
+                                        </p>
+
+                                        <!-- Grille 2 colonnes -->
+                                        <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                            <tr>
+                                                <td style="width:50%; padding-bottom:12px; vertical-align:top;">
+                                                    <p style="margin:0 0 2px; font-size:9px; letter-spacing:1.5px;
+                                                              text-transform:uppercase; color:#7c6fa0;">
+                                                        Date de l'événement
+                                                    </p>
+                                                    <p style="margin:0; font-size:13px; font-weight:bold; color:#1a1a2e;">
+                                                        {{ evenement.date|date('d/m/Y') }}
+                                                    </p>
+                                                </td>
+                                                <td style="width:50%; padding-bottom:12px; vertical-align:top;">
+                                                    <p style="margin:0 0 2px; font-size:9px; letter-spacing:1.5px;
+                                                              text-transform:uppercase; color:#7c6fa0;">
+                                                        Lieu
+                                                    </p>
+                                                    <p style="margin:0; font-size:13px; font-weight:bold; color:#1a1a2e;">
+                                                        {{ evenement.lieu }}
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="vertical-align:top;">
+                                                    <p style="margin:0 0 2px; font-size:9px; letter-spacing:1.5px;
+                                                              text-transform:uppercase; color:#7c6fa0;">
+                                                        Date d'achat
+                                                    </p>
+                                                    <p style="margin:0; font-size:13px; font-weight:bold; color:#1a1a2e;">
+                                                        {{ ticket.dateAchat|date('d/m/Y') }}
+                                                    </p>
+                                                </td>
+                                                <td style="vertical-align:top;">
+                                                    <p style="margin:0 0 2px; font-size:9px; letter-spacing:1.5px;
+                                                              text-transform:uppercase; color:#7c6fa0;">
+                                                        Montant payé
+                                                    </p>
+                                                    <p style="margin:0; font-size:15px; font-weight:bold;
+                                                              color:#3d1e8a;">
+                                                        {{ evenement.prixTicket }} €
+                                                    </p>
+                                                </td>
+                                            </tr>
+                                        </table>
+
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Bloc code unique -->
+                    <tr>
+                        <td style="padding:24px 40px 0;">
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0"
+                                   style="background:#1a1a2e; border-radius:8px;">
+                                <tr>
+                                    <td style="padding:20px 24px;" align="center">
+                                        <p style="margin:0 0 6px; font-size:9px; letter-spacing:2px;
+                                                  text-transform:uppercase; color:#7c70a8;">
+                                            Code billet
+                                        </p>
+                                        <p style="margin:0; font-size:22px; font-weight:bold;
+                                                  color:#ffffff; letter-spacing:4px;">
+                                            {{ ticket.codeUnique }}
+                                        </p>
+                                        <p style="margin:8px 0 0; font-size:11px; color:#5a5180;">
+                                            Présentez ce code à l'entrée de l'événement
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Message espace commandes -->
+                    <tr>
+                        <td style="padding:24px 40px 0;">
+                            <p style="margin:0; font-size:13px; color:#4a4a6a; line-height:1.7;">
+                                Votre <strong>ticket PDF avec QR code</strong> est disponible
+                                directement dans votre espace commandes sur EasyOrganis.
+                                Vous pouvez le télécharger à tout moment pour le présenter à l'entrée.
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Bouton CTA -->
+                    <tr>
+                        <td style="padding:24px 40px 0;">
+                            <table cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td style="background-color:#3d1e8a; border-radius:6px;">
+                                        <a href="{{ absolute_url(path('app_acheteur_commandes')) }}"
+                                           style="display:inline-block; padding:13px 28px;
+                                                  font-size:14px; font-weight:bold;
+                                                  color:#ffffff; text-decoration:none;
+                                                  letter-spacing:0.3px;">
+                                            Voir mes commandes
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Séparateur -->
+                    <tr>
+                        <td style="padding:32px 40px 0;">
+                            <hr style="border:none; border-top:1px solid #ede8f8; margin:0;">
+                        </td>
+                    </tr>
+
+                    <!-- Pied de page -->
+                    <tr>
+                        <td style="padding:20px 40px 32px;">
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td>
+                                        <p style="margin:0; font-size:11px; color:#a09abf; line-height:1.5;">
+                                            Vous recevez cet email car vous avez effectué un achat
+                                            sur EasyOrganis. Pour toute question, connectez-vous
+                                            à votre espace client.
+                                        </p>
+                                    </td>
+                                    <td align="right" style="white-space:nowrap; padding-left:16px;">
+                                        <p style="margin:0; font-size:13px; font-weight:bold; color:#3d1e8a;">
+                                            <span style="color:#a78bfa;">Easy</span>Organis
+                                        </p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                </table>
+                <!-- fin carte -->
+
+                <p style="margin:20px 0 0; font-size:11px; color:#a09abf; text-align:center;">
+                    &copy; {{ "now"|date("Y") }} EasyOrganis &mdash; Tous droits réservés
+                </p>
+
+            </td>
+        </tr>
+    </table>
+
+</body>
+</html>

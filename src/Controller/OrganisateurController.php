@@ -13,6 +13,8 @@ use Symfony\Component\HttpFoundation\Request;
 use App\Entity\Tickets;
 use App\Service\QwenService;
 use App\Entity\Categories;
+use App\Repository\TicketsRepository;
+
 final class OrganisateurController extends AbstractController
 
 
@@ -68,14 +70,37 @@ final class OrganisateurController extends AbstractController
         ]);
     }
     #[Route('/organisateur/evenements', name: 'app_organisateur_evenements')]
-    public function evenements(EvenementsRepository $evenementsRepository): Response
+    public function evenements(EvenementsRepository $evenementsRepository,TicketsRepository $ticketsRepository): Response
     {
         $evenements = $evenementsRepository->findBy([
         'user_id' => $this->getUser()
         ]);
 
+        $totalTicketsVendu = 0;
+        $totalRevenu = 0;
+        $prochainEvenement = null;
+        $now = new \DateTime();
+        foreach($evenements as $evenement){
+            $vendu = $ticketsRepository->count([
+                'evenement_id' => $evenement,
+                'statut' => 'vendu'
+            ]);
+            $totalTicketsVendu += $vendu;
+            $totalRevenu += $vendu * $evenement->getPrixTicket();
+
+            if($evenement->getDate() > $now){
+                if($prochainEvenement === null || $evenement->getDate() < $prochainEvenement->getDate()){
+                    $prochainEvenement = $evenement;
+                }
+            }
+        }
+
         return $this->render('organisateur/mes_evenements.html.twig', [
             'evenements' => $evenements,
+            'total_evenements' => count($evenements),
+            'total_tickets_vendus' => $totalTicketsVendu,
+            'total_revenus' => $totalRevenu,
+            'prochain_evenement' => $prochainEvenement,
         ]);
     }
     #[Route('/organisateur/evenements/{id}/modifier', name: 'app_organisateur_modifier')]

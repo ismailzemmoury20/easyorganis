@@ -146,14 +146,6 @@
 {% endblock %}
 
 {% block body %}
-{#
-    Variables Twig attendues :
-    - evenements : collection d'Evenements avec tickets_vendus et tickets_restants
-    - total_evenements : int
-    - total_tickets_vendus : int
-    - total_revenus : float
-    - prochain_evenement : Evenement|null
-#}
 <div class="events-layout animate-fade-up">
 
     {# Header #}
@@ -212,7 +204,7 @@
     {% else %}
     <div class="event-grid">
         {% for evenement in evenements %}
-        {% set vendus = evenement.ticketsVendus ?? 0 %}
+        {% set vendus = 0 %}
         {% set total  = evenement.nombresPlaces ?? 0 %}
         {% set pct    = total > 0 ? (vendus / total * 100)|round : 0 %}
 
@@ -225,7 +217,7 @@
                 {% endif %}
                 <div class="event-cover-overlay"></div>
                 <div class="event-cover-badge" style="display:flex;flex-direction:column;align-items:flex-end;gap:0.35rem;">
-                    <span class="event-cat">{{ evenement.categorie.nomCategorie ?? 'Autre' }}</span>
+                    <span class="event-cat">{{ evenement.categorie ? evenement.categorie.nomCategorie : 'Autre' }}</span>
                     {% if evenement.isPublished %}
                         <span class="publish-badge published"><i class="bi bi-check-circle-fill"></i> Publié</span>
                     {% else %}
@@ -275,6 +267,13 @@
                        onclick="return confirm('Publier cet événement ? Il sera visible par tous les acheteurs.')">
                         <i class="bi bi-send-fill"></i> Publier
                     </a>
+                    {% else %}
+                    <button class="btn-sm-eo btn-sm-ghost"
+                            style="cursor:pointer;"
+                            onclick="copyEventUrl('{{ absolute_url(path('app_public_evenement', {slug: evenement.slug})) }}', this)"
+                            title="Copier le lien de partage">
+                        <i class="bi bi-share"></i> Partager
+                    </button>
                     {% endif %}
                     <a href="{{ path('app_organisateur_supprimer', {id: evenement.id}) }}"
                        class="btn-sm-eo btn-sm-danger"
@@ -289,4 +288,31 @@
     {% endif %}
 
 </div>
+
+<div id="share-toast" style="position:fixed;bottom:1.5rem;right:1.5rem;
+     background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);
+     color:#34d399;padding:0.625rem 1rem;border-radius:10px;font-size:0.85rem;
+     font-weight:500;display:flex;align-items:center;gap:0.5rem;
+     opacity:0;transition:opacity 0.25s ease;pointer-events:none;z-index:9999;">
+    <i class="bi bi-check-circle-fill"></i> Lien copié !
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+function copyEventUrl(url, btn) {
+    navigator.clipboard.writeText(url).then(() => {
+        const icon  = btn.querySelector('i');
+        const toast = document.getElementById('share-toast');
+        icon.className = 'bi bi-check-lg';
+        btn.style.color = '#34d399';
+        toast.style.opacity = '1';
+        setTimeout(() => {
+            icon.className = 'bi bi-share';
+            btn.style.color = '';
+            toast.style.opacity = '0';
+        }, 2200);
+    });
+}
+</script>
 {% endblock %}

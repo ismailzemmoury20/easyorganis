@@ -11,6 +11,8 @@ RUN apt-get update && apt-get install -y libpq-dev \
 
 RUN composer install --no-dev --optimize-autoloader --no-scripts
 
+RUN APP_ENV=prod php bin/console cache:warmup
+
 EXPOSE 80
 
 ENTRYPOINT ["frankenphp", "run", "--config", "/app/Caddyfile"]

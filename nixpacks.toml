@@ -1,6 +1,0 @@
-[variables]
-APP_ENV = "prod"
-COMPOSER_ALLOW_SUPERUSER = "1"
-
-[phases.build]
-cmds = ["composer install --no-dev --optimize-autoloader --no-scripts"]

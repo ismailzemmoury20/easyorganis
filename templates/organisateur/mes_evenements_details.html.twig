@@ -191,6 +191,17 @@
                    style="font-size:0.85rem;padding:0.5rem 1rem;display:inline-flex;align-items:center;gap:0.4rem;font-weight:700;color:#34d399;background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);border-radius:10px;text-decoration:none;transition:all 0.15s;">
                     <i class="bi bi-send-fill"></i> Publier l'événement
                 </a>
+                {% else %}
+                <a href="{{ path('app_public_evenement', {slug: evenement.slug}) }}"
+                   target="_blank" rel="noopener"
+                   class="btn-secondary-eo" style="font-size:0.85rem;padding:0.5rem 1rem;">
+                    <i class="bi bi-box-arrow-up-right"></i> Voir la page publique
+                </a>
+                <button onclick="copyDetailUrl('{{ absolute_url(path('app_public_evenement', {slug: evenement.slug})) }}')"
+                        class="btn-secondary-eo" style="font-size:0.85rem;padding:0.5rem 1rem;cursor:pointer;border:none;"
+                        id="detail-copy-btn" title="Copier le lien de partage">
+                    <i class="bi bi-link-45deg" id="detail-copy-icon"></i> Copier le lien
+                </button>
                 {% endif %}
                 <a href="{{ path('app_organisateur_evenements') }}" class="btn-secondary-eo" style="font-size:0.85rem;padding:0.5rem 1rem;">
                     <i class="bi bi-arrow-left"></i> Retour
@@ -282,4 +293,29 @@
     </div>
 
 </div>
+
+<div id="detail-toast" style="position:fixed;bottom:1.5rem;right:1.5rem;
+     background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);
+     color:#34d399;padding:0.625rem 1rem;border-radius:10px;font-size:0.85rem;
+     font-weight:500;display:flex;align-items:center;gap:0.5rem;
+     opacity:0;transition:opacity 0.25s ease;pointer-events:none;z-index:9999;">
+    <i class="bi bi-check-circle-fill"></i> Lien copié !
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+function copyDetailUrl(url) {
+    navigator.clipboard.writeText(url).then(() => {
+        const icon  = document.getElementById('detail-copy-icon');
+        const toast = document.getElementById('detail-toast');
+        icon.className = 'bi bi-check-lg';
+        toast.style.opacity = '1';
+        setTimeout(() => {
+            icon.className = 'bi bi-link-45deg';
+            toast.style.opacity = '0';
+        }, 2200);
+    });
+}
+</script>
 {% endblock %}

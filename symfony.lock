@@ -47,8 +47,23 @@
             "config/routes/easyadmin.yaml"
         ]
     },
+    "endroid/qr-code-bundle": {
+        "version": "7.0.1"
+    },
     "knplabs/knp-paginator-bundle": {
         "version": "v6.10.0"
+    },
+    "nucleos/dompdf-bundle": {
+        "version": "4.5",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "3.1",
+            "ref": "0a89461aec4873f9205f1fc04c96c607116abb2e"
+        },
+        "files": [
+            "config/packages/nucleos_dompdf.yaml"
+        ]
     },
     "phpunit/phpunit": {
         "version": "13.1",
@@ -366,6 +381,9 @@
         "files": [
             "config/packages/messenger.yaml"
         ]
+    },
+    "symfonycasts/verify-email-bundle": {
+        "version": "v1.18.0"
     },
     "twig/extra-bundle": {
         "version": "v3.24.0"

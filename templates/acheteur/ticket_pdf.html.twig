@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Ticket — {{ evenement.nom }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: helvetica, sans-serif;
+            background: #ffffff;
+            color: #1a1a2e;
+            font-size: 13px;
+        }
+
+        .ticket-wrapper {
+            width: 680px;
+            margin: 40px auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+
+        /* ── Bande supérieure colorée ── */
+        .ticket-header {
+            background-color: #3d1e8a;
+            padding: 28px 32px 22px;
+        }
+
+        .ticket-header .label {
+            font-size: 10px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: #c4aff5;
+            margin-bottom: 6px;
+        }
+
+        .ticket-header .event-name {
+            font-size: 26px;
+            font-weight: bold;
+            color: #ffffff;
+            line-height: 1.2;
+        }
+
+        .ticket-header .event-date-place {
+            font-size: 13px;
+            color: #d6c8ff;
+            margin-top: 8px;
+        }
+
+        /* ── Ligne de séparation pointillée ── */
+        .tear-line {
+            background: #f4f4f8;
+            border-top: 2px dashed #c0b4e8;
+            border-bottom: 2px dashed #c0b4e8;
+            padding: 0 32px;
+            height: 1px;
+        }
+
+        /* ── Corps du ticket ── */
+        .ticket-body {
+            padding: 28px 32px;
+        }
+
+        .body-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .body-table td {
+            vertical-align: top;
+            padding: 0;
+        }
+
+        .col-info {
+            width: 62%;
+            padding-right: 24px;
+        }
+
+        .col-qr {
+            width: 38%;
+            text-align: center;
+        }
+
+        /* ── Infos ── */
+        .info-block {
+            margin-bottom: 18px;
+        }
+
+        .info-label {
+            font-size: 9px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #7c6fa0;
+            margin-bottom: 3px;
+        }
+
+        .info-value {
+            font-size: 14px;
+            font-weight: bold;
+            color: #1a1a2e;
+        }
+
+        .info-value.large {
+            font-size: 17px;
+        }
+
+        .info-grid {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .info-grid td {
+            width: 50%;
+            padding-bottom: 16px;
+            vertical-align: top;
+        }
+
+        /* Séparateur vertical entre les blocs */
+        .divider-v {
+            width: 1px;
+            background: #ede8f8;
+        }
+
+        /* ── QR code ── */
+        .qr-box {
+            background: #f8f6ff;
+            border: 1px solid #ddd5f5;
+            border-radius: 6px;
+            padding: 16px;
+            display: inline-block;
+        }
+
+        .qr-box img {
+            display: block;
+        }
+
+        .qr-hint {
+            font-size: 9px;
+            color: #9b8ec4;
+            text-align: center;
+            margin-top: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        /* ── Prix badge ── */
+        .price-badge {
+            display: inline-block;
+            background: #3d1e8a;
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: bold;
+            padding: 6px 16px;
+            border-radius: 20px;
+            margin-top: 4px;
+        }
+
+        /* ── Description ── */
+        .description-block {
+            background: #f8f6ff;
+            border-left: 3px solid #7c4dff;
+            padding: 10px 14px;
+            margin-top: 18px;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .description-block p {
+            font-size: 11px;
+            color: #4a3f6e;
+            line-height: 1.5;
+        }
+
+        /* ── Pied de ticket ── */
+        .ticket-footer {
+            background: #1a1a2e;
+            padding: 18px 32px;
+        }
+
+        .footer-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .footer-table td {
+            vertical-align: middle;
+        }
+
+        .footer-label {
+            font-size: 9px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #7c70a8;
+            margin-bottom: 4px;
+        }
+
+        .code-unique {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ffffff;
+            letter-spacing: 3px;
+        }
+
+        .footer-right {
+            text-align: right;
+        }
+
+        .easyorganis-brand {
+            font-size: 11px;
+            color: #7c70a8;
+            letter-spacing: 1px;
+        }
+
+        .easyorganis-brand span {
+            color: #a78bfa;
+            font-weight: bold;
+        }
+
+        .purchase-date {
+            font-size: 10px;
+            color: #5a5180;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="ticket-wrapper">
+
+    <!-- ══ EN-TÊTE ══ -->
+    <div class="ticket-header">
+        <div class="label">Billet d'entrée · EasyOrganis</div>
+        <div class="event-name">{{ evenement.nom }}</div>
+        <div class="event-date-place">
+            {{ evenement.date|date('d/m/Y') }}
+            &nbsp;·&nbsp;
+            {{ evenement.lieu }}
+        </div>
+    </div>
+
+    <div class="tear-line"></div>
+
+    <!-- ══ CORPS ══ -->
+    <div class="ticket-body">
+        <table class="body-table">
+            <tr>
+                <!-- Colonne infos -->
+                <td class="col-info">
+
+                    <table class="info-grid">
+                        <tr>
+                            <td>
+                                <div class="info-block">
+                                    <div class="info-label">Titulaire</div>
+                                    <div class="info-value large">{{ ticket.userId.prenom }} {{ ticket.userId.nom }}</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="info-block">
+                                    <div class="info-label">Tarif</div>
+                                    <div class="price-badge">{{ evenement.prixTicket }} €</div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div class="info-block">
+                                    <div class="info-label">Date de l'événement</div>
+                                    <div class="info-value">{{ evenement.date|date('d/m/Y') }}</div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="info-block">
+                                    <div class="info-label">Lieu</div>
+                                    <div class="info-value">{{ evenement.lieu }}</div>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+
+                    {% if evenement.description %}
+                        <div class="description-block">
+                            <p>{{ evenement.description }}</p>
+                        </div>
+                    {% endif %}
+
+                </td>
+
+                <!-- Colonne QR code -->
+                <td class="col-qr">
+                    <div class="qr-box">
+                        <img src="{{ absolute_url(path('app_acheteur_code', {'id': ticket.id})) }}"
+                             width="160" height="160" alt="QR Code">
+                    </div>
+                    <div class="qr-hint">Scannez à l'entrée</div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- ══ PIED ══ -->
+    <div class="ticket-footer">
+        <table class="footer-table">
+            <tr>
+                <td>
+                    <div class="footer-label">Code billet</div>
+                    <div class="code-unique">{{ ticket.codeUnique }}</div>
+                </td>
+                <td class="footer-right">
+                    <div class="easyorganis-brand"><span>Easy</span>Organis</div>
+                    <div class="purchase-date">Acheté le {{ ticket.dateAchat|date('d/m/Y') }}</div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+</div>
+
+</body>
+</html>

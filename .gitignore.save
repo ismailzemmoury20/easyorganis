@@ -18,6 +18,12 @@
 /public/assets/
 /assets/vendor/
 ###< symfony/asset-mapper ###
-.env
+# .env
 .env.dev
 .env.test
+
+Exit
+^X
+^x
+
+

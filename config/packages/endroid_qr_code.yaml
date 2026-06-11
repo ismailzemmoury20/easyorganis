@@ -1,0 +1,6 @@
+endroid_qr_code:
+    builders:
+        custom:
+            writer: Endroid\QrCode\Writer\PngWriter
+            size: 300
+            margin: 20

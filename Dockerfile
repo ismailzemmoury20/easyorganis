@@ -9,8 +9,6 @@ COPY . .
 RUN apt-get update && apt-get install -y libpq-dev unzip \
     && docker-php-ext-install pdo pdo_mysql
 
-RUN COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader --no-scripts
-
 EXPOSE 80
 
 ENTRYPOINT ["frankenphp", "run", "--config", "/app/Caddyfile"]

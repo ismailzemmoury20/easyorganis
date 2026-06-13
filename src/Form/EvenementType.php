@@ -2,9 +2,7 @@
 
 namespace App\Form;
 
-use App\Entity\Categories;
 use App\Entity\Evenements;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
@@ -74,11 +72,12 @@ class EvenementType extends AbstractType
                     new GreaterThan(value: -1, message: 'Le prix ne peut pas être négatif.'),
                 ],
             ])
-            ->add('categorie', EntityType::class, [
-                'class' => Categories::class,
-                'choice_label' => 'nomCategorie',
-                'placeholder' => 'Choisir une catégorie',
+            ->add('categorie', TextType::class, [
+                'mapped' => false,
                 'required' => false,
+                'data' => isset($options['data']) && $options['data']->getCategorie()
+                    ? $options['data']->getCategorie()->getNomCategorie()
+                    : '',
             ])
         ;
     }

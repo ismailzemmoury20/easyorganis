@@ -139,7 +139,7 @@
 
             <div class="form-group-eo">
                 {{ form_label(form.categorie, 'Catégorie', {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(form.categorie, {'attr': {'class': 'form-select'}}) }}
+                {{ form_widget(form.categorie, {'attr': {'class': 'form-control', 'placeholder': 'Ex : Concert, Conférence, Sport…'}}) }}
                 {{ form_errors(form.categorie) }}
             </div>
 
@@ -299,8 +299,7 @@ function getFormValues() {
     const nom         = document.querySelector('[name$="[nom]"]')?.value ?? '';
     const lieu        = document.querySelector('[name$="[lieu]"]')?.value ?? '';
     const date        = document.querySelector('[name$="[date]"]')?.value ?? '';
-    const catSelect   = document.querySelector('[name$="[categorie]"]');
-    const categorie   = catSelect?.options[catSelect.selectedIndex]?.text ?? '';
+    const categorie   = document.querySelector('[name$="[categorie]"]')?.value ?? '';
     const description = (document.querySelector('[name$="[description]"]')
                       || document.getElementById('description-textarea'))?.value ?? '';
     return { nom, lieu, date, categorie, description };

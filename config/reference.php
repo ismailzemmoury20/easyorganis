@@ -1507,6 +1507,17 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         collect_components?: bool|Param, // Collect components instances // Default: true
  *     },
  * }
+ * @psalm-type EndroidQrCodeConfig = array{
+ *     route_prefix?: scalar|Param|null, // Default: "/qr-code"
+ *     route_enabled?: bool|Param, // Default: true
+ *     builders?: array<string, array<string, mixed>>,
+ * }
+ * @psalm-type NucleosDompdfConfig = array{
+ *     defaults?: array<string, scalar|Param|null>,
+ * }
+ * @psalm-type SymfonycastsVerifyEmailConfig = array{
+ *     lifetime?: int|Param, // The length of time in seconds that a signed URI is valid for after it is created. // Default: 3600
+ * }
  * @psalm-type ConfigType = array{
  *     imports?: ImportsConfig,
  *     parameters?: ParametersConfig,
@@ -1522,6 +1533,9 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     monolog?: MonologConfig,
  *     knp_paginator?: KnpPaginatorConfig,
  *     twig_component?: TwigComponentConfig,
+ *     endroid_qr_code?: EndroidQrCodeConfig,
+ *     nucleos_dompdf?: NucleosDompdfConfig,
+ *     symfonycasts_verify_email?: SymfonycastsVerifyEmailConfig,
  *     "when@dev"?: array{
  *         imports?: ImportsConfig,
  *         parameters?: ParametersConfig,
@@ -1540,6 +1554,9 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         maker?: MakerConfig,
  *         knp_paginator?: KnpPaginatorConfig,
  *         twig_component?: TwigComponentConfig,
+ *         endroid_qr_code?: EndroidQrCodeConfig,
+ *         nucleos_dompdf?: NucleosDompdfConfig,
+ *         symfonycasts_verify_email?: SymfonycastsVerifyEmailConfig,
  *     },
  *     "when@prod"?: array{
  *         imports?: ImportsConfig,
@@ -1556,6 +1573,9 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         monolog?: MonologConfig,
  *         knp_paginator?: KnpPaginatorConfig,
  *         twig_component?: TwigComponentConfig,
+ *         endroid_qr_code?: EndroidQrCodeConfig,
+ *         nucleos_dompdf?: NucleosDompdfConfig,
+ *         symfonycasts_verify_email?: SymfonycastsVerifyEmailConfig,
  *     },
  *     "when@test"?: array{
  *         imports?: ImportsConfig,
@@ -1573,6 +1593,9 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         monolog?: MonologConfig,
  *         knp_paginator?: KnpPaginatorConfig,
  *         twig_component?: TwigComponentConfig,
+ *         endroid_qr_code?: EndroidQrCodeConfig,
+ *         nucleos_dompdf?: NucleosDompdfConfig,
+ *         symfonycasts_verify_email?: SymfonycastsVerifyEmailConfig,
  *     },
  *     ...<string, ExtensionType|array{ // extra keys must follow the when@%env% pattern or match an extension alias
  *         imports?: ImportsConfig,

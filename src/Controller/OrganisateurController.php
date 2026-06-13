@@ -29,6 +29,20 @@ final class OrganisateurController extends AbstractController
             $evenement->setUserId($this->getUser());
             $slug = strtolower(preg_replace('/[^A-Za-z0-9-]+/', '-', $evenement->getNom()));
             $evenement->setSlug($slug . '-' . uniqid());
+
+            $categorieText = trim($form->get('categorie')->getData() ?? '');
+            if ($categorieText !== '') {
+                $categorieEntity = $entityManager->getRepository(Categories::class)->findOneBy(['nom_categorie' => $categorieText]);
+                if (!$categorieEntity) {
+                    $categorieEntity = new Categories();
+                    $categorieEntity->setNomCategorie($categorieText);
+                    $entityManager->persist($categorieEntity);
+                }
+                $evenement->setCategorie($categorieEntity);
+            } else {
+                $evenement->setCategorie(null);
+            }
+
             $entityManager->persist($evenement);
             $entityManager->flush();
             for($i= 0; $i < $evenement->getNombresPlaces(); $i++) {
@@ -113,6 +127,18 @@ final class OrganisateurController extends AbstractController
         $form = $this->createForm(EvenementType::class, $evenement, ['is_edit' => true]);
         $form->handleRequest($request);
         if($form->isSubmitted() && $form->isValid()){
+            $categorieText = trim($form->get('categorie')->getData() ?? '');
+            if ($categorieText !== '') {
+                $categorieEntity = $em->getRepository(Categories::class)->findOneBy(['nom_categorie' => $categorieText]);
+                if (!$categorieEntity) {
+                    $categorieEntity = new Categories();
+                    $categorieEntity->setNomCategorie($categorieText);
+                    $em->persist($categorieEntity);
+                }
+                $evenement->setCategorie($categorieEntity);
+            } else {
+                $evenement->setCategorie(null);
+            }
             $em->flush();
             return $this->redirectToRoute('app_organisateur_evenements');
         }

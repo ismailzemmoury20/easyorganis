@@ -531,7 +531,6 @@ return array(
     'PHPUnit\\Framework\\TestSuite' => $vendorDir . '/phpunit/phpunit/src/Framework/TestSuite.php',
     'PHPUnit\\Framework\\TestSuiteIterator' => $vendorDir . '/phpunit/phpunit/src/Framework/TestSuiteIterator.php',
     'PHPUnit\\Framework\\UnknownClassOrInterfaceException' => $vendorDir . '/phpunit/phpunit/src/Framework/Exception/UnknownClassOrInterfaceException.php',
-    'PHPUnit\\Framework\\UnknownNativeTypeException' => $vendorDir . '/phpunit/phpunit/src/Framework/Exception/UnknownNativeTypeException.php',
     'PHPUnit\\Logging\\EventLogger' => $vendorDir . '/phpunit/phpunit/src/Logging/EventLogger.php',
     'PHPUnit\\Logging\\JUnit\\JunitXmlLogger' => $vendorDir . '/phpunit/phpunit/src/Logging/JUnit/JunitXmlLogger.php',
     'PHPUnit\\Logging\\JUnit\\Subscriber' => $vendorDir . '/phpunit/phpunit/src/Logging/JUnit/Subscriber/Subscriber.php',

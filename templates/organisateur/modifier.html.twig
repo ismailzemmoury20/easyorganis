@@ -155,7 +155,7 @@
 
             <div class="form-group-eo">
                 {{ form_label(form.categorie, 'Catégorie', {'label_attr': {'class': 'form-label'}}) }}
-                {{ form_widget(form.categorie, {'attr': {'class': 'form-select'}}) }}
+                {{ form_widget(form.categorie, {'attr': {'class': 'form-control', 'placeholder': 'Ex : Concert, Conférence, Sport…'}}) }}
                 {{ form_errors(form.categorie) }}
             </div>
 

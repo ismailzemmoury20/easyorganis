@@ -100,8 +100,61 @@
     textarea.form-control { min-height: 120px; resize: vertical; }
     select.form-select option { background: #1a1a2e; color: var(--text); }
 
+    .variation-row-form {
+        display: grid;
+        grid-template-columns: 1fr 130px 130px 36px;
+        gap: 0.75rem;
+        align-items: end;
+        padding: 0.875rem;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 12px;
+        margin-bottom: 0.625rem;
+    }
+    .variation-row-form label {
+        display: block;
+        font-size: 0.73rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-bottom: 0.3rem;
+    }
+    .variation-row-form input {
+        width: 100%;
+        padding: 0.55rem 0.8rem;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 8px;
+        color: var(--text);
+        font-size: 0.88rem;
+    }
+    .variation-row-form input:focus {
+        outline: none;
+        border-color: rgba(124,58,237,0.5);
+        box-shadow: 0 0 0 3px rgba(124,58,237,0.12);
+    }
+    .btn-remove-variation {
+        width: 36px; height: 36px;
+        display: flex; align-items: center; justify-content: center;
+        background: rgba(239,68,68,0.08);
+        border: 1px solid rgba(239,68,68,0.2);
+        border-radius: 8px;
+        color: #f87171;
+        cursor: pointer;
+        transition: all 0.15s;
+        font-size: 0.9rem;
+    }
+    .btn-remove-variation:hover {
+        background: rgba(239,68,68,0.18);
+        border-color: rgba(239,68,68,0.4);
+    }
+
     @media (max-width: 600px) {
         .field-row { grid-template-columns: 1fr; }
+        .variation-row-form { grid-template-columns: 1fr 1fr; }
+        .variation-row-form .var-stock-group { grid-column: 1; }
+        .variation-row-form .var-remove-group { grid-column: 2; justify-self: end; }
     }
 </style>
 {% endblock %}
@@ -276,6 +329,29 @@
             </div>
         </div>
 
+        {# ── Section 5 : Variations de billets ── #}
+        <div class="section-block animate-fade-up delay-4">
+            <div class="section-header">
+                <div class="section-num">5</div>
+                <div>
+                    <h2>Variations de billets</h2>
+                    <p>VIP, Standard, Early Bird… Laissez vide si un seul tarif</p>
+                </div>
+            </div>
+
+            <div id="variations-container"></div>
+
+            <button type="button" onclick="addVariation()"
+                style="display:inline-flex;align-items:center;gap:0.5rem;margin-top:0.5rem;
+                       padding:0.5rem 1rem;border-radius:10px;font-size:0.85rem;font-weight:600;
+                       background:rgba(255,255,255,0.04);border:1px dashed rgba(255,255,255,0.15);
+                       color:var(--text-muted);cursor:pointer;transition:all 0.15s;"
+                onmouseover="this.style.borderColor='rgba(124,58,237,0.4)';this.style.color='var(--primary-light)'"
+                onmouseout="this.style.borderColor='rgba(255,255,255,0.15)';this.style.color='var(--text-muted)'">
+                <i class="bi bi-plus-circle"></i> Ajouter une variation
+            </button>
+        </div>
+
         {# ── Actions ── #}
         <div class="form-actions">
             <a href="{{ path('app_organisateur_evenements') }}" class="btn-secondary-eo">
@@ -365,6 +441,40 @@ function validerDescription() {
 
 function fermerPreview() {
     document.getElementById('ai-preview').style.display = 'none';
+}
+
+let varIndex = 0;
+
+function addVariation() {
+    const container = document.getElementById('variations-container');
+    const idx = varIndex++;
+    const row = document.createElement('div');
+    row.className = 'variation-row-form';
+    row.id = 'var-row-' + idx;
+    row.innerHTML = `
+        <div>
+            <label>Nom de la variation</label>
+            <input type="text" name="variations[${idx}][nom]" placeholder="Ex : VIP, Standard…">
+        </div>
+        <div>
+            <label>Prix (€)</label>
+            <input type="number" name="variations[${idx}][prix]" placeholder="0.00" min="0" step="0.01">
+        </div>
+        <div class="var-stock-group">
+            <label>Nb de places</label>
+            <input type="number" name="variations[${idx}][stock]" placeholder="100" min="1">
+        </div>
+        <div class="var-remove-group" style="display:flex;align-items:flex-end;">
+            <button type="button" class="btn-remove-variation" onclick="removeVariation(${idx})" title="Supprimer">
+                <i class="bi bi-trash3"></i>
+            </button>
+        </div>
+    `;
+    container.appendChild(row);
+}
+
+function removeVariation(idx) {
+    document.getElementById('var-row-' + idx)?.remove();
 }
 </script>
 {% endblock %}

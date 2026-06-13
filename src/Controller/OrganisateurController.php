@@ -11,6 +11,7 @@ use App\Repository\EvenementsRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use App\Entity\Tickets;
+use App\Entity\TicketsVariation;
 use App\Service\QwenService;
 use App\Entity\Categories;
 use App\Repository\TicketsRepository;
@@ -45,6 +46,18 @@ final class OrganisateurController extends AbstractController
 
             $entityManager->persist($evenement);
             $entityManager->flush();
+
+            foreach ($request->request->all()['variations'] ?? [] as $varData) {
+                $nom = trim($varData['nom'] ?? '');
+                if ($nom === '') continue;
+                $variation = new TicketsVariation();
+                $variation->setNom($nom);
+                $variation->setPrix((float)($varData['prix'] ?? 0));
+                $variation->setStock((int)($varData['stock'] ?? 0));
+                $variation->setEvenement($evenement);
+                $entityManager->persist($variation);
+            }
+
             for($i= 0; $i < $evenement->getNombresPlaces(); $i++) {
                 $ticket = new Tickets();
                 $ticket->setEvenementId($evenement);

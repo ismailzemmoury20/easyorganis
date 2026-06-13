@@ -185,14 +185,17 @@ final class OrganisateurController extends AbstractController
     public function genererDescription(Request $request, QwenService $qwenService): Response
     {
         $data = json_decode($request->getContent(), true);
-        $description = $qwenService->generateDescription(
-            $data['nom'] ?? '',
-            $data['lieu'] ?? '',
-            $data['date'] ?? '',
-            $data['categorie'] ?? '',
-            $data['description'] ?? ''
-        );
-
-        return $this->json(['description' => $description]);
+        try {
+            $description = $qwenService->generateDescription(
+                $data['nom'] ?? '',
+                $data['lieu'] ?? '',
+                $data['date'] ?? '',
+                $data['categorie'] ?? '',
+                $data['description'] ?? ''
+            );
+            return $this->json(['description' => $description]);
+        } catch (\Throwable $e) {
+            return $this->json(['error' => $e->getMessage()], 500);
+        }
     }
 }

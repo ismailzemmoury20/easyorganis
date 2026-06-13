@@ -326,18 +326,21 @@ async function genererDescriptionIA() {
             body: JSON.stringify({ nom, lieu, date, categorie, description })
         });
 
-        if (!response.ok) throw new Error('Erreur serveur');
+        if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.error ?? 'Erreur serveur ' + response.status);
+        }
 
         const data = await response.json();
-        const description = data.description ?? '';
+        const aiDescription = data.description ?? '';
 
         // Affiche le preview
-        document.getElementById('ai-preview-text').textContent = description;
+        document.getElementById('ai-preview-text').textContent = aiDescription;
         document.getElementById('ai-preview').style.display = 'block';
         document.getElementById('ai-preview').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
     } catch (e) {
-        alert('Erreur lors de la génération. Réessayez.');
+        alert('Erreur lors de la génération : ' + e.message);
     } finally {
         btn.disabled = false;
         text.textContent = 'Générer avec l\'IA';

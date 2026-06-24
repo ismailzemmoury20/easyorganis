@@ -6,8 +6,6 @@ use App\Entity\Evenements;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\FileType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
-use Symfony\Component\Form\Extension\Core\Type\NumberType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -15,7 +13,6 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints\File;
 use Symfony\Component\Validator\Constraints\GreaterThan;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Positive;
 
 class EvenementType extends AbstractType
 {
@@ -57,19 +54,6 @@ class EvenementType extends AbstractType
                         mimeTypes: ['image/jpeg', 'image/png', 'image/webp'],
                         mimeTypesMessage: 'Format accepté : JPG, PNG, WebP.',
                     ),
-                ],
-            ])
-            ->add('nombres_places', IntegerType::class, [
-                'constraints' => [
-                    new NotBlank(message: 'Le nombre de places est obligatoire.'),
-                    new Positive(message: 'Le nombre de places doit être positif.'),
-                ],
-            ])
-            ->add('prix_ticket', NumberType::class, [
-                'scale' => 2,
-                'constraints' => [
-                    new NotBlank(message: 'Le prix du ticket est obligatoire.'),
-                    new GreaterThan(value: -1, message: 'Le prix ne peut pas être négatif.'),
                 ],
             ])
             ->add('categorie', TextType::class, [

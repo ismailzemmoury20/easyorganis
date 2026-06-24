@@ -10,7 +10,6 @@ use App\Form\EvenementType;
 use App\Repository\EvenementsRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
-use App\Entity\Tickets;
 use App\Entity\TicketsVariation;
 use App\Service\QwenService;
 use App\Entity\Categories;
@@ -44,26 +43,26 @@ final class OrganisateurController extends AbstractController
                 $evenement->setCategorie(null);
             }
 
+            $variationsData = array_filter(
+                $request->request->all()['variations'] ?? [],
+                fn($v) => trim($v['nom'] ?? '') !== ''
+            );
+
+            $totalStock = array_sum(array_column($variationsData, 'stock'));
+            $prices = array_column($variationsData, 'prix');
+            $evenement->setNombresPlaces((int) $totalStock);
+            $evenement->setPrixTicket(!empty($prices) ? (float) min($prices) : 0.0);
+
             $entityManager->persist($evenement);
             $entityManager->flush();
 
-            foreach ($request->request->all()['variations'] ?? [] as $varData) {
-                $nom = trim($varData['nom'] ?? '');
-                if ($nom === '') continue;
+            foreach ($variationsData as $varData) {
                 $variation = new TicketsVariation();
-                $variation->setNom($nom);
+                $variation->setNom(trim($varData['nom']));
                 $variation->setPrix((float)($varData['prix'] ?? 0));
                 $variation->setStock((int)($varData['stock'] ?? 0));
                 $variation->setEvenement($evenement);
                 $entityManager->persist($variation);
-            }
-
-            for($i= 0; $i < $evenement->getNombresPlaces(); $i++) {
-                $ticket = new Tickets();
-                $ticket->setEvenementId($evenement);
-                $ticket->setStatut('disponible');
-                $ticket->setCodeUnique(strtoupper(uniqid('TK-')));
-                $entityManager->persist($ticket);
             }
             $entityManager->flush();
             return $this->redirectToRoute('app_organisateur_evenements');

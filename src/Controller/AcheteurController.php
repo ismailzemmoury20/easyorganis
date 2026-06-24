@@ -12,6 +12,7 @@ use Knp\Component\Pager\PaginatorInterface;
 use App\Repository\TicketsRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Commandes;
+use App\Entity\Tickets;
 use App\Repository\CommandesRepository;
 use App\Repository\CategoriesRepository;
 use Endroid\QrCode\Builder\BuilderInterface;
@@ -63,28 +64,48 @@ final class AcheteurController extends AbstractController
         ]);
     }
     #[Route('/acheteur/evenements/{id}/acheter', name: 'app_acheteur_acheter')]
-    public function acheterTicker(MailerInterface $mailer, TicketsRepository $ticketsRepository, Request $request, int $id, EntityManagerInterface $em, \App\Service\StripeService $stripeService): Response
+    public function acheterTicker(EvenementsRepository $evenementsRepository, int $id, EntityManagerInterface $em, \App\Service\StripeService $stripeService): Response
     {
         $user = $this->getUser();
         if (!$user instanceof \App\Entity\User) {
             throw $this->createAccessDeniedException();
         }
 
-        $ticket = $ticketsRepository->findTicketsByEvenement($id);
-        if(empty($ticket)){
+        $evenement = $evenementsRepository->find($id);
+        if (!$evenement) {
+            throw $this->createNotFoundException('Événement introuvable.');
+        }
+
+        $hasStock = false;
+        foreach ($evenement->getTicketsVariations() as $variation) {
+            if ($variation->getStock() > 0) {
+                $hasStock = true;
+                break;
+            }
+        }
+        if (!$hasStock) {
             $this->addFlash('error', 'Aucun ticket disponible pour cet événement.');
             return $this->redirectToRoute('app_acheteur_evenements_details', ['id' => $id]);
         }
+
+        $ticket = new Tickets();
+        $ticket->setEvenementId($evenement);
+        $ticket->setUserId($user);
+        $ticket->setStatut('en_attente');
+        $ticket->setDateAchat(new \DateTime());
+        $ticket->setCodeUnique(strtoupper(uniqid('TK-')));
+        $em->persist($ticket);
+        $em->flush();
+
         $paymentLink = $stripeService->createPaymentLink([
-            'product_name' => $ticket->getEvenementId()->getNom(),
-            'amount' => $ticket->getEvenementId()->getPrixTicket(),
+            'product_name' => $evenement->getNom(),
+            'amount' => $evenement->getPrixTicket(),
             'quantity' => 1,
             'success_url' => $this->generateUrl('payment_success', ['ticket_id' => $ticket->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
             'cancel_url' => $this->generateUrl('payment_cancel', [], UrlGeneratorInterface::ABSOLUTE_URL),
         ]);
 
-        return $this->redirect($paymentLink); 
-
+        return $this->redirect($paymentLink);
     }
     
     #[Route('/acheteur/evenements/{id}/qr', name: 'app_acheteur_code')]

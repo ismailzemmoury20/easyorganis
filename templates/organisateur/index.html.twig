@@ -286,37 +286,10 @@
             </div>
         </div>
 
-        {# ── Section 3 : Billetterie ── #}
+        {# ── Section 3 : Image ── #}
         <div class="section-block animate-fade-up delay-3">
             <div class="section-header">
                 <div class="section-num">3</div>
-                <div>
-                    <h2>Billetterie</h2>
-                    <p>Prix et nombre de places disponibles</p>
-                </div>
-            </div>
-
-            <div class="field-row">
-                <div class="form-group-eo">
-                    {{ form_label(form.nombres_places, 'Nombre de places', {'label_attr': {'class': 'form-label'}}) }}
-                    {{ form_widget(form.nombres_places, {'attr': {'class': 'form-control', 'placeholder': '500', 'min': '1'}}) }}
-                    {{ form_errors(form.nombres_places) }}
-                </div>
-                <div class="form-group-eo">
-                    {{ form_label(form.prix_ticket, 'Prix du ticket (€)', {'label_attr': {'class': 'form-label'}}) }}
-                    <div class="price-input-wrap">
-                        {{ form_widget(form.prix_ticket, {'attr': {'class': 'form-control', 'placeholder': '25.00', 'step': '0.01', 'min': '0'}}) }}
-                        <span class="price-suffix">€</span>
-                    </div>
-                    {{ form_errors(form.prix_ticket) }}
-                </div>
-            </div>
-        </div>
-
-        {# ── Section 4 : Image ── #}
-        <div class="section-block animate-fade-up delay-4">
-            <div class="section-header">
-                <div class="section-num">4</div>
                 <div>
                     <h2>Visuel de l'événement</h2>
                     <p>Image de couverture (JPG, PNG — max 5 Mo)</p>
@@ -329,10 +302,10 @@
             </div>
         </div>
 
-        {# ── Section 5 : Variations de billets ── #}
+        {# ── Section 4 : Variations de billets ── #}
         <div class="section-block animate-fade-up delay-4">
             <div class="section-header">
-                <div class="section-num">5</div>
+                <div class="section-num">4</div>
                 <div>
                     <h2>Variations de billets</h2>
                     <p>VIP, Standard, Early Bird… Laissez vide si un seul tarif</p>

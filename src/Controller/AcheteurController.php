@@ -5,6 +5,7 @@ namespace App\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use App\Repository\EvenementsRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Knp\Component\Pager\PaginatorInterface;
@@ -62,7 +63,7 @@ final class AcheteurController extends AbstractController
         ]);
     }
     #[Route('/acheteur/evenements/{id}/acheter', name: 'app_acheteur_acheter')]
-    public function acheterTicker(MailerInterface $mailer, TicketsRepository $ticketsRepository, Request $request, int $id, EntityManagerInterface $em): Response
+    public function acheterTicker(MailerInterface $mailer, TicketsRepository $ticketsRepository, Request $request, int $id, EntityManagerInterface $em, \App\Service\StripeService $stripeService): Response
     {
         $user = $this->getUser();
         if (!$user instanceof \App\Entity\User) {
@@ -73,38 +74,21 @@ final class AcheteurController extends AbstractController
         if(empty($ticket)){
             $this->addFlash('error', 'Aucun ticket disponible pour cet événement.');
             return $this->redirectToRoute('app_acheteur_evenements_details', ['id' => $id]);
-        } else {
-            $ticket->setStatut('vendu');
-            $commande = new Commandes();
-            $commande->setEvenementId($ticket->getEvenementId());
-            $commande->setUserId($user);
-            $commande->setMontantTotal($ticket->getEvenementId()->getPrixTicket());
-            $commande->setDateCommande(new \DateTime());
-            $commande->setAchat(1);
-            $commande->setStatut('payé');
-            $em->persist($commande);
-            $ticket->setUserId($user);
-            $ticket->setDateAchat(new \DateTime());
-            $em->flush();
-            $this->addFlash('success', 'Ticket acheté avec succès !');
-
-            $email = (new TemplatedEmail())
-                ->from(new Address('ismail.zamouri3@gmail.com', 'EasyOrganis'))
-                ->to($user->getEmail())
-                ->subject('Votre ticket — ' . $ticket->getEvenementId()->getNom())
-                ->htmlTemplate('acheteur/email_ticket.html.twig')
-                ->context([
-                    'ticket' => $ticket,
-                    'evenement' => $ticket->getEvenementId(),
-                ]);
-
-            $mailer->send($email);
-
-            return $this->redirectToRoute('app_acheteur_ticket_pdf', ['id' => $ticket->getId()]);
         }
+        $paymentLink = $stripeService->createPaymentLink([
+            'product_name' => $ticket->getEvenementId()->getNom(),
+            'amount' => $ticket->getEvenementId()->getPrixTicket(),
+            'quantity' => 1,
+            'success_url' => $this->generateUrl('payment_success', ['ticket_id' => $ticket->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
+            'cancel_url' => $this->generateUrl('payment_cancel', [], UrlGeneratorInterface::ABSOLUTE_URL),
+        ]);
+
+        return $this->redirect($paymentLink); 
+
     }
+    
     #[Route('/acheteur/evenements/{id}/qr', name: 'app_acheteur_code')]
-    public function ticketCodeQr(BuilderInterface $customQrCodeBuilder ,TicketsRepository $ticketsRepository, Request $request, int $id): Response
+    public function ticketCodeQr(BuilderInterface $customQrCodeBuilder ,TicketsRepository $ticketsRepository, int $id): Response
     {
         $ticket = $ticketsRepository->find($id);
         if (!$ticket || $ticket->getUserId() !== $this->getUser()) {

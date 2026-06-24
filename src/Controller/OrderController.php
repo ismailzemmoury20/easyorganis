@@ -47,13 +47,13 @@ final class OrderController extends AbstractController
         return $this->redirect($checkout_session->url);
     }
     
-    #[Route('/order/success', name: 'payment_success')]
+    #[Route('/order/success', name: 'order_payment_success')]
     public function success(): Response
     {
         return $this->render('order/success.html.twig');
     }
 
-    #[Route('/order/cancel', name: 'payment_cancel')]
+    #[Route('/order/cancel', name: 'order_payment_cancel')]
     public function cancel(): Response
     {
         return $this->render('order/cancel.html.twig');

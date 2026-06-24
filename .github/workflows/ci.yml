@@ -11,6 +11,11 @@ jobs:
     steps: 
       -name: Dire Bonjour
       run: echo "Hello, GitHub Actions!"
+      -name: Se connecter à docker
+      run: echo "$DOCKER_TOKEN" | docker_login -u "$DOCKER_USER" --password-stdin
+      env:  
+        DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN}}
+        DOCKER_USER: ${{ secrets.DOCKER_USER }}
 
       -name: Afficher les infos sur le contexte
       run: |

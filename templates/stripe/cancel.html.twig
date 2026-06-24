@@ -1,0 +1,149 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Paiement annulé — EasyOrganis{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .payment-layout {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 4rem 1.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .payment-icon {
+        width: 88px; height: 88px;
+        border-radius: 50%;
+        background: rgba(239,68,68,0.1);
+        border: 2px solid rgba(239,68,68,0.25);
+        display: flex; align-items: center; justify-content: center;
+        font-size: 2.5rem;
+        margin-bottom: 2rem;
+        animation: pop 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+
+    @keyframes pop {
+        from { transform: scale(0.4); opacity: 0; }
+        to   { transform: scale(1);   opacity: 1; }
+    }
+
+    .payment-title {
+        font-size: 1.75rem; font-weight: 800;
+        letter-spacing: -0.03em;
+        color: var(--text);
+        margin-bottom: 0.75rem;
+    }
+
+    .payment-subtitle {
+        font-size: 1rem;
+        color: var(--text-muted);
+        line-height: 1.7;
+        margin-bottom: 2.5rem;
+        max-width: 420px;
+    }
+
+    .info-card {
+        width: 100%;
+        border-radius: 16px;
+        padding: 1.25rem 1.5rem;
+        margin-bottom: 0.875rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    .info-card.danger {
+        background: rgba(239,68,68,0.05);
+        border: 1px solid rgba(239,68,68,0.15);
+    }
+    .info-card.neutral {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.07);
+    }
+
+    .info-card-icon {
+        width: 44px; height: 44px; flex-shrink: 0;
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.2rem;
+    }
+    .info-card.danger  .info-card-icon { background: rgba(239,68,68,0.1);    color: #f87171; }
+    .info-card.neutral .info-card-icon { background: rgba(255,255,255,0.05); color: var(--text-muted); }
+
+    .info-card-text { text-align: left; }
+    .info-card-label { font-size: 0.75rem; color: var(--text-dim); margin-bottom: 0.2rem; font-weight: 500; }
+    .info-card-value { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+
+    .payment-actions {
+        display: flex; gap: 0.875rem; flex-wrap: wrap;
+        justify-content: center; margin-top: 1.25rem;
+    }
+
+    .divider-or {
+        width: 100%; display: flex; align-items: center; gap: 1rem;
+        margin: 1rem 0; color: var(--text-dim); font-size: 0.78rem;
+    }
+    .divider-or::before, .divider-or::after {
+        content: ''; flex: 1; height: 1px; background: rgba(255,255,255,0.07);
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="payment-layout animate-fade-up">
+
+    <div class="payment-icon">
+        <i class="bi bi-x-lg" style="font-size:2rem;color:#f87171;"></i>
+    </div>
+
+    <h1 class="payment-title">Paiement annulé</h1>
+    <p class="payment-subtitle">
+        Votre paiement n'a pas abouti. Aucun montant n'a été débité de votre compte.
+        Vous pouvez retenter à tout moment.
+    </p>
+
+    <div class="info-card danger animate-fade-up delay-1">
+        <div class="info-card-icon">
+            <i class="bi bi-x-circle-fill"></i>
+        </div>
+        <div class="info-card-text">
+            <div class="info-card-label">Statut</div>
+            <div class="info-card-value" style="color:#f87171;">Annulé — aucun débit effectué</div>
+        </div>
+    </div>
+
+    <div class="info-card neutral animate-fade-up delay-2">
+        <div class="info-card-icon">
+            <i class="bi bi-shield-check"></i>
+        </div>
+        <div class="info-card-text">
+            <div class="info-card-label">Sécurité</div>
+            <div class="info-card-value">Vos données bancaires restent protégées</div>
+        </div>
+    </div>
+
+    <div class="info-card neutral animate-fade-up delay-3">
+        <div class="info-card-icon">
+            <i class="bi bi-arrow-repeat"></i>
+        </div>
+        <div class="info-card-text">
+            <div class="info-card-label">Que faire ?</div>
+            <div class="info-card-value">Retournez sur l'événement pour réessayer</div>
+        </div>
+    </div>
+
+    <div class="divider-or">ou</div>
+
+    <div class="payment-actions">
+        <a href="{{ path('app_acheteur') }}" class="btn-primary-eo">
+            <i class="bi bi-arrow-left"></i> Retour aux événements
+        </a>
+        <a href="{{ path('app_acheteur_commandes') }}" class="btn-secondary-eo">
+            <i class="bi bi-ticket-perforated"></i> Mes billets
+        </a>
+    </div>
+
+</div>
+{% endblock %}

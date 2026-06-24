@@ -12,3 +12,8 @@ services:
     App\Service\QwenService:
         arguments:
             $qwenApiKey: '%env(QWEN_API_KEY)%'
+            
+    App\Service\StripeService:
+        arguments:
+            $secretKey: '%env(STRIPE_SECRET_KEY)%'
+        
